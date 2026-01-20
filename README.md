@@ -41,10 +41,10 @@ The project is ready for containerized deployment using Docker Compose.
    * Copy `.env.example` to a new file named `.env`.
    * Provide values for `DB_PASSWORD` and `JWT_TOKEN`.
 
-2. **Launch:**
-   docker-compose up --build
+2. **Launch:**  
+docker-compose up --build
 
-3. **Endpoints:**
+4. **Endpoints:**
    * Scalar Documentation: http://localhost:8080/scalar
    * OpenAPI Specification: http://localhost:8080/openapi/v1.json
 
@@ -56,3 +56,4 @@ The project is ready for containerized deployment using Docker Compose.
 ## Developer Note
 
 This project was developed as part of a career transition from Unity Game Development (C#) to Enterprise .NET Development.
+
