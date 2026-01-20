@@ -1,0 +1,21 @@
+services:
+  pet-feeding-api:
+    image: didwefeedthecattoday-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AppSettings__Token=${JWT_TOKEN}
+      - ConnectionStrings__DefaultConnection=Server=db;Database=PetsDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true
+    depends_on:
+      - db
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "1433:1433"
