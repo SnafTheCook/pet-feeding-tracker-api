@@ -42,7 +42,8 @@ The project is ready for containerized deployment using Docker Compose.
    * Provide values for `DB_PASSWORD` and `JWT_TOKEN`.
 
 2. **Launch:**  
-docker-compose up --build
+  
+    ```docker-compose up --build```
 
 4. **Endpoints:**
    * Scalar Documentation: http://localhost:8080/scalar
@@ -56,4 +57,5 @@ docker-compose up --build
 ## Developer Note
 
 This project was developed as part of a career transition from Unity Game Development (C#) to Enterprise .NET Development.
+
 
