@@ -20,7 +20,6 @@ AnyCPU/
 *.log
 
 .env
-.env.*
 secrets.json
 appsettings.Development.json
 appsettings.Local.json
