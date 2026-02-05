@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.DTOs.Pets;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
 using FluentAssertions;
@@ -48,6 +49,44 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var result = await service.GetPetByIdAsync(9999);
 
             result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetAllPetsAsync_WhenPetsExist_ReturnArray()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var testPets = new List<Pet> 
+            { 
+                new Pet { Id = 1, Name = "Meowstarion"},
+                new Pet { Id = 2, Name = "Katlach"},
+                new Pet { Id = 3, Name = "Shadowcar"},
+            };
+
+            await context.AddRangeAsync(testPets);
+            await context.SaveChangesAsync();
+
+            var result = await service.GetAllPetsAsync();
+
+            result.Should().NotBeNull();
+            result.Should().HaveCount(3);
+
+            result.Should().Contain(pet => pet.Name == "Meowstarion");
+            result.Should().Contain(pet => pet.Name == "Katlach");
+            result.Should().Contain(pet => pet.Name == "Shadowcar");
+        }
+
+        [Fact]
+        public async Task GetAllPetsAsync_WhenNoPetsExist_ReturnsEmptyList()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var result = await service.GetAllPetsAsync();
+
+            result.Should().NotBeNull();
+            result.Should().BeEmpty();
         }
     }
 }
