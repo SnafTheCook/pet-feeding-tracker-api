@@ -88,5 +88,35 @@ namespace DidWeFeedTheCatToday.Tests.Services
             result.Should().NotBeNull();
             result.Should().BeEmpty();
         }
+
+        [Fact]
+        public async Task AddPetAsync_WhenValidDTOProvided_SavesToDatabaseAndReturnDTO()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var commandDTO = new CommandPetDTO
+            {
+                Name = "Meowstarion",
+                Age = 3,
+                AdditionalInformation = "Sneaky one."
+            };
+
+            var result = await service.AddPetAsync(commandDTO);
+
+            //checking returend GetPetDTO
+            result.Should().NotBeNull();
+            result.Name.Should().Be("Meowstarion");
+            result.Id.Should().BeGreaterThan(0);
+
+            result.CreationDate.Should().NotBeNull();
+            result.CreationDate.Value.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+
+            //checking state in db
+            var petInDb = await context.Pets.FirstOrDefaultAsync(pet => pet.Id == result.Id);
+            petInDb.Should().NotBeNull();
+            petInDb.Name.Should().Be("Meowstarion");
+            petInDb.CreationDate.Should().NotBeNull();
+        }
     }
 }
