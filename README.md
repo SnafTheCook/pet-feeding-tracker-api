@@ -1,4 +1,5 @@
 # Pet Feeding Tracker API
+![Build Status](https://github.com/SnafTheCook/pet-feeding-tracker-api/actions/workflows/dotnet.yml/badge.svg)
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512bd4)
 ![EF Core](https://img.shields.io/badge/EF%20Core-9.0-blue)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
@@ -61,6 +62,7 @@ The project is ready for containerized deployment using Docker Compose.
 ## Developer Note
 
 This project was developed as part of a career transition from Unity Game Development (C#) to Enterprise .NET Development.
+
 
 
 
