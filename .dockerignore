@@ -1,0 +1,7 @@
+.git
+.github
+tests/
+DidWeFeedTheCatToday.Tests/
+bin/
+obj/
+.env
