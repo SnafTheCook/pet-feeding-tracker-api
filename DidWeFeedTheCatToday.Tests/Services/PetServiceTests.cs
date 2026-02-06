@@ -29,7 +29,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
             using var context = GetDbContext();
             var service = new PetService(context);
 
-            var testPet = new Pet { Id = 1, Name = "Meowstarion" };
+            var testPet = new Pet { Name = "Meowstarion" };
             context.Add(testPet);
             await context.SaveChangesAsync();
 
@@ -59,9 +59,9 @@ namespace DidWeFeedTheCatToday.Tests.Services
 
             var testPets = new List<Pet> 
             { 
-                new Pet { Id = 1, Name = "Meowstarion"},
-                new Pet { Id = 2, Name = "Katlach"},
-                new Pet { Id = 3, Name = "Shadowcar"},
+                new Pet { Name = "Meowstarion"},
+                new Pet { Name = "Katlach"},
+                new Pet { Name = "Shadowcar"},
             };
 
             await context.AddRangeAsync(testPets);
@@ -118,5 +118,76 @@ namespace DidWeFeedTheCatToday.Tests.Services
             petInDb.Name.Should().Be("Meowstarion");
             petInDb.CreationDate.Should().NotBeNull();
         }
+
+        [Fact]
+        public async Task OverridePetAsync_WhenPetExists_OverrideData()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var testPet = new Pet { Name = "Meowstarion" };
+            context.Add(testPet);
+            await context.SaveChangesAsync();
+
+            var testCommandPetDto = new CommandPetDTO
+            {
+                Name = "Katlach"
+            };
+
+            var result = await service.OverridePetAsync(testPet.Id, testCommandPetDto);
+
+            result.Success.Should().BeTrue();
+
+            var overrodePet = await context.Pets.FirstOrDefaultAsync(pet => pet.Id == testPet.Id);
+
+            overrodePet.Should().NotBeNull();
+            overrodePet.Name.Should().Be("Katlach");
+        }
+
+        [Fact]
+        public async Task OverridePetAsync_WhenPetDoesntExist_ReturnFalse()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var testCommandPetDto = new CommandPetDTO
+            {
+                Name = "Katlach"
+            };
+
+            var result = await service.OverridePetAsync(9999, testCommandPetDto);
+
+            result.Success.Should().BeFalse();
+            result.Error.Should().Be(Common.ServiceResultError.NotFound);
+        }
+
+        [Fact]
+        public async Task DeletePetAsync_WhenPetFoundAndDeleted_ReturnTrue()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var testPet = new Pet { Name = "Meowstarion" };
+            context.Add(testPet);
+            await context.SaveChangesAsync();
+
+            var result = await service.DeletePetAsync(testPet.Id);
+            result.Should().BeTrue();
+
+            var petInDb = await context.Pets.FindAsync(testPet.Id);
+            petInDb.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task DeletePetAsync_WhenPetNotFound_ReturnFalse()
+        {
+            using var context = GetDbContext();
+            var service = new PetService(context);
+
+            var result = await service.DeletePetAsync(9999);
+
+            result.Should().BeFalse();
+        }
+
     }
 }
