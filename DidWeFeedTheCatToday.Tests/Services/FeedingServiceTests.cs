@@ -76,5 +76,43 @@ namespace DidWeFeedTheCatToday.Tests.Services
 
             result.Should().BeNull();
         }
+
+        [Fact]
+        public async Task AddFeedingAsync_WhenPetExists_SavesFeedingAndReturnsDto()
+        {
+            using var context = GetDbContext();
+            var service = new FeedingService(context);
+
+            var testPet = new Pet { Name = "Meowstarion" };
+
+            context.Pets.Add(testPet);
+            await context.SaveChangesAsync();
+
+            var testFeedingDto = new PostFeedingDTO
+            {
+                PetId = testPet.Id,
+                FeedingTime = DateTime.UtcNow
+            };
+
+            var result = await service.AddFeedingAsync(testFeedingDto);
+
+            result.Should().NotBeNull();
+            result.PetId.Should().Be(testPet.Id);
+
+            context.Feedings.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public async Task AddFeedingAsync_WhenPetDoesNotExist_ReturnsNull()
+        {
+            using var context = GetDbContext();
+            var service = new FeedingService(context);
+
+            var testFeedingDto = new PostFeedingDTO { PetId = 9999 };
+
+            var result = await service.AddFeedingAsync(testFeedingDto);
+
+            result.Should().BeNull();
+        }
     }
 }
