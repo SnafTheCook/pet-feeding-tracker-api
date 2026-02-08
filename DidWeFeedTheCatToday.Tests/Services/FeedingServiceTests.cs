@@ -114,5 +114,43 @@ namespace DidWeFeedTheCatToday.Tests.Services
 
             result.Should().BeNull();
         }
+
+        [Fact]
+        public async Task DeleteFeedingAsync_WhenFeedingExists_RemovesFromDatabaseAndReturnsTrue()
+        {
+            using var context = GetDbContext();
+            var service = new FeedingService(context);
+
+            var testPet = new Pet { Name = "Meowstarion" };
+            context.Pets.Add(testPet);
+
+            var testFeeding = new Feeding 
+            {
+                PetId = testPet.Id, 
+                FeedingTime = DateTime.UtcNow 
+            };
+            context.Feedings.Add(testFeeding);
+
+            await context.SaveChangesAsync();
+
+            var feedingInDb = await context.Feedings.AnyAsync(feed => feed.Id == testFeeding.Id);
+            feedingInDb.Should().BeTrue();
+
+            var result = await service.DeleteFeedingAsync(testFeeding.Id);
+            result.Should().BeTrue();
+
+            var feedingInDbAfterDelete = await context.Feedings.AnyAsync(feed => feed.Id == testFeeding.Id);
+            feedingInDbAfterDelete.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task DeleteFeedingAsync_WhenFeedingDoesNotExist_ReturnsFalse()
+        {
+            using var context = GetDbContext();
+            var service = new FeedingService(context);
+
+            var result = await service.DeleteFeedingAsync(9999);
+            result.Should().BeFalse();
+        }
     }
 }
