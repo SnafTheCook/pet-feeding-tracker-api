@@ -59,5 +59,25 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Success.Should().BeFalse();
             apiResponse.Error.Should().Be("No Pet found under index.");
         }
+
+        [Fact]
+        public async Task PostPet_WhenPetPosted_ReturnsOk()
+        {
+            var testPet = new CommandPetDTO { Name = "MeowstarionPost" };
+            var returnedPet = new GetPetDTO { Name = "MeowstarionGet", Id = 1 };
+
+            _mockPetService
+                .Setup(setup => setup.AddPetAsync(testPet))
+                .ReturnsAsync(returnedPet);
+
+            var result = await _petController.PostPet(testPet);
+            var okResult = result.Result.Should().BeOfType<CreatedAtActionResult>().Subject;
+            var apiResponse = okResult.Value.Should().BeOfType<ApiResponse<GetPetDTO>>().Subject;
+
+            apiResponse.Success.Should().BeTrue();
+            apiResponse.Data.Should().NotBeNull();
+            apiResponse.Data.Id.Should().Be(returnedPet.Id);
+            apiResponse.Data.Name.Should().Be(returnedPet.Name);
+        }
     }
 }
