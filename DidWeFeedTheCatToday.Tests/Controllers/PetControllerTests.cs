@@ -1,6 +1,7 @@
 ﻿using DidWeFeedTheCatToday.Common;
 using DidWeFeedTheCatToday.Controllers;
 using DidWeFeedTheCatToday.DTOs.Pets;
+using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -83,7 +84,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         }
 
         [Fact]
-        public async Task PutPet_WhenPetOverrode_ReturnNoContent()
+        public async Task PutPet_WhenPetOverrode_ReturnsNoContent()
         {
             int testId = 1;
             var testPet = new CommandPetDTO { Name = "Meowstaroin" };
@@ -99,7 +100,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         [Fact]
         public async Task PutPet_WhenPathNotFound_ReturnsNotFound()
         {
-            int testId = 1;
+            int testId = 9999;
             var testPet = new CommandPetDTO { Name = "Meowstaroin" };
 
             _mockPetService
@@ -134,6 +135,37 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Error.Should().Be("Pet was changed since last request.");
 
             _mockPetService.Verify(v => v.OverridePetAsync(testId, testPet), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeletePet_WhenPetDeleted_ReturnsNoContent()
+        {
+            int testId = 1;
+
+            _mockPetService
+                .Setup(setup => setup.DeletePetAsync(testId))
+                .ReturnsAsync(true);
+
+            var result = await _petController.DeletePet(testId);
+            result.Should().BeOfType<NoContentResult>();
+        }
+
+
+        [Fact]
+        public async Task DeletePet_WhenPetNotFound_ReturnsNotFound()
+        {
+            int testId = 9999;
+
+            _mockPetService
+                .Setup(setup => setup.DeletePetAsync(testId))
+                .ReturnsAsync(false);
+
+            var result = await _petController.DeletePet(testId);
+            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
+            var apiResponse = notFoundResult.Value.Should().BeOfType<ApiResponse<GetPetDTO>>().Subject;
+
+            apiResponse.Success.Should().BeFalse();
+            apiResponse.Error.Should().Be("Pet not found.");
         }
     }
 }
