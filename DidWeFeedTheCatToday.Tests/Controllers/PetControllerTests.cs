@@ -78,6 +78,62 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Data.Should().NotBeNull();
             apiResponse.Data.Id.Should().Be(returnedPet.Id);
             apiResponse.Data.Name.Should().Be(returnedPet.Name);
+
+            _mockPetService.Verify(v => v.AddPetAsync(testPet), Times.Once);
+        }
+
+        [Fact]
+        public async Task PutPet_WhenPetOverrode_ReturnNoContent()
+        {
+            int testId = 1;
+            var testPet = new CommandPetDTO { Name = "Meowstaroin" };
+
+            _mockPetService
+                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+                .ReturnsAsync(ServiceResult.Ok());
+
+            var result = await _petController.PutPet(testId, testPet);
+            result.Should().BeOfType<NoContentResult>();
+        }
+
+        [Fact]
+        public async Task PutPet_WhenPathNotFound_ReturnsNotFound()
+        {
+            int testId = 1;
+            var testPet = new CommandPetDTO { Name = "Meowstaroin" };
+
+            _mockPetService
+                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+                .ReturnsAsync(ServiceResult.Fail(ServiceResultError.NotFound));
+
+            var result = await _petController.PutPet(testId, testPet);
+            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
+            var apiResponse = notFoundResult.Value.Should().BeOfType<ApiResponse<GetPetDTO>>().Subject;
+
+            apiResponse.Success.Should().BeFalse();
+            apiResponse.Error.Should().Be("Pet not found.");
+
+            _mockPetService.Verify(v => v.OverridePetAsync(testId, testPet), Times.Once);
+        }
+
+        [Fact]
+        public async Task PutPet_WhenConflicted_ReturnsConcurrencyConflict()
+        {
+            int testId = 1;
+            var testPet = new CommandPetDTO { Name = "Meowstaroin" };
+
+            _mockPetService
+                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+                .ReturnsAsync(ServiceResult.Fail(ServiceResultError.ConcurrencyConflict));
+
+            var result = await _petController.PutPet(testId, testPet);
+            var concConflictResult = result.Should().BeOfType<ConflictObjectResult>().Subject;
+            var apiResponse = concConflictResult.Value.Should().BeOfType<ApiResponse<GetPetDTO>>().Subject;
+
+            apiResponse.Success.Should().BeFalse();
+            apiResponse.Error.Should().Be("Pet was changed since last request.");
+
+            _mockPetService.Verify(v => v.OverridePetAsync(testId, testPet), Times.Once);
         }
     }
 }
