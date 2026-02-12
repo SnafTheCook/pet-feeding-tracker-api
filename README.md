@@ -11,10 +11,12 @@ A .NET 9 Web API built to manage and track pet feeding schedules. This project s
 
 * **Framework:** .NET 9 (ASP.NET Core Web API)
 * **Database:** SQL Server via Entity Framework Core
+* **Testing:** xUnit, Moq, FluentAssertions
 * **Security:** JWT Authentication with Refresh Token rotation
 * **Validation:** FluentValidation with custom Action Filters
 * **Documentation:** Scalar and OpenAPI
 * **Containerization:** Docker and Docker Compose
+* **CI/CD:** GitHub Actions
 
 ## Architecture and Design Patterns
 
@@ -23,6 +25,12 @@ The application implements a clear separation of concerns to ensure maintainabil
 * **Controllers:** Designed as thin entry points that delegate business logic to the service layer.
 * **Service Layer:** Encapsulates business rules and database operations, abstracting complexity from the API layer.
 * **DTOs (Data Transfer Objects):** Used to decouple the internal database schema from the public-facing API, preventing unintended data exposure.
+
+### Automated Unit Testing
+The project includes a comprehensive test suite.
+* **Service Testing:** Logic verification using an EF Core In-Memory database provider.
+* **Controller Testing:** Verification of API contracts and HTTP responses using **Moq** to isolate the web layer from the service layer.
+* **State Verification:** Deep-object assertions using **FluentAssertions** to ensure nested data integrity.
 
 ### Database Integrity
 * **Concurrency Management:** Implemented optimistic concurrency using `RowVersion` (Timestamp) on the Pet entity. This prevents data loss during simultaneous updates by throwing a `DbUpdateConcurrencyException`.
@@ -55,13 +63,14 @@ The project is ready for containerized deployment using Docker Compose.
    * OpenAPI Specification: http://localhost:8080/openapi/v1.json
 
 ## Project Roadmap
-  * **Unit Testing:** Implement a testing suite using xUnit and Moq to validate service layer logic.
-  * **Mapping Libraries:** Transition from manual DTO mapping to Mapperly or AutoMapper to improve maintainability.
-  * **CORS Configuration:** Define restricted origin policies for frontend integration.
+  * **Clean Architecture:** Transitioning to a hexagonal/onion architecture to further decouple the core domain.
+  * **Frontend Integration:** Building a Blazor WebAssembly dashboard to interact with the API.
+  * **Cloud Deployment:** Configuring automated deployment to Azure App Service and Azure SQL.
 
 ## Developer Note
 
 This project was developed as part of a career transition from Unity Game Development (C#) to Enterprise .NET Development.
+
 
 
 
