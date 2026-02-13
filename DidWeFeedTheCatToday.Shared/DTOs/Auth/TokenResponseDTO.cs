@@ -1,4 +1,4 @@
-﻿namespace DidWeFeedTheCatToday.DTOs.Auth
+﻿namespace DidWeFeedTheCatToday.Shared.DTOs.Auth
 {
     public class TokenResponseDTO
     {

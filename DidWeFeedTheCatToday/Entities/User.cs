@@ -1,4 +1,6 @@
-﻿namespace DidWeFeedTheCatToday.Entities
+﻿using DidWeFeedTheCatToday.Shared.Enums;
+
+namespace DidWeFeedTheCatToday.Entities
 {
     public class User
     {
@@ -15,12 +17,5 @@
 
         public DateTime? RefreshTokenCreatedAt { get; set; }
         public string? RefreshTokenCreatedByIp { get; set; }
-    }
-
-    public enum Roles
-    {
-        Admin,
-        Parent,
-        Child
     }
 }

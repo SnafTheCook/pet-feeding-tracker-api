@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace DidWeFeedTheCatToday.Data

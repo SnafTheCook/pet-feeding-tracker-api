@@ -1,4 +1,4 @@
-﻿namespace DidWeFeedTheCatToday.DTOs.Feedings
+﻿namespace DidWeFeedTheCatToday.Shared.DTOs.Feedings
 {
     public class PostFeedingDTO
     {

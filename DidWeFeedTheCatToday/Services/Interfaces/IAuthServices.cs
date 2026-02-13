@@ -1,5 +1,4 @@
-﻿using DidWeFeedTheCatToday.DTOs.Auth;
-using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 
 namespace DidWeFeedTheCatToday.Services.Interfaces
 {

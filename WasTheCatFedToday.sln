@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DidWeFeedTheCatToday", "Did
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DidWeFeedTheCatToday.Tests", "DidWeFeedTheCatToday.Tests\DidWeFeedTheCatToday.Tests.csproj", "{84CE9DD5-B7FF-2531-9B46-C3B30F739B7C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DidWeFeedTheCatToday.Shared", "DidWeFeedTheCatToday.Shared\DidWeFeedTheCatToday.Shared.csproj", "{5C84157C-6AA2-4F8D-A71C-E8A30CD746AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{84CE9DD5-B7FF-2531-9B46-C3B30F739B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84CE9DD5-B7FF-2531-9B46-C3B30F739B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84CE9DD5-B7FF-2531-9B46-C3B30F739B7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C84157C-6AA2-4F8D-A71C-E8A30CD746AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C84157C-6AA2-4F8D-A71C-E8A30CD746AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C84157C-6AA2-4F8D-A71C-E8A30CD746AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C84157C-6AA2-4F8D-A71C-E8A30CD746AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

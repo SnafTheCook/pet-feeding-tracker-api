@@ -1,14 +1,10 @@
 ﻿using DidWeFeedTheCatToday.Data;
-using DidWeFeedTheCatToday.DTOs.Pets;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
+using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {
@@ -158,7 +154,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var result = await service.OverridePetAsync(9999, testCommandPetDto);
 
             result.Success.Should().BeFalse();
-            result.Error.Should().Be(Common.ServiceResultError.NotFound);
+            result.Error.Should().Be(ServiceResultError.NotFound);
         }
 
         [Fact]
