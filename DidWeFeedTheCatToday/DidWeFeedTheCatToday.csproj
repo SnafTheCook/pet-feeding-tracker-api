@@ -24,4 +24,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DidWeFeedTheCatToday.Shared\DidWeFeedTheCatToday.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

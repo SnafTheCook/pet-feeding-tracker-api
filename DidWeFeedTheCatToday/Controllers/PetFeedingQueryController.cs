@@ -1,7 +1,8 @@
-﻿using DidWeFeedTheCatToday.Common;
-using DidWeFeedTheCatToday.DTOs.PetFeedings;
-using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
+using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
+using DidWeFeedTheCatToday.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

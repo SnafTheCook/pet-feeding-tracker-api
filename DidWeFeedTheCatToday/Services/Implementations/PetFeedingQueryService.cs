@@ -1,9 +1,9 @@
-﻿using DidWeFeedTheCatToday.DTOs.Feedings;
-using DidWeFeedTheCatToday.DTOs.PetFeedings;
-using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
+using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {

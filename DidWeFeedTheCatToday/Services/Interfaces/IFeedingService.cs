@@ -1,4 +1,4 @@
-﻿using DidWeFeedTheCatToday.DTOs.Feedings;
+﻿using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 
 namespace DidWeFeedTheCatToday.Services.Interfaces
 {

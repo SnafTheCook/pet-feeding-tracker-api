@@ -1,4 +1,4 @@
-﻿using DidWeFeedTheCatToday.DTOs.Auth;
+﻿using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 using FluentValidation;
 
 namespace DidWeFeedTheCatToday.Validation.Auth

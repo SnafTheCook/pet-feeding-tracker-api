@@ -1,4 +1,4 @@
-﻿using DidWeFeedTheCatToday.DTOs.Feedings;
+﻿using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using FluentValidation;
 
 namespace DidWeFeedTheCatToday.Validation.Feedings

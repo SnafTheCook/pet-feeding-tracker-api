@@ -1,5 +1,4 @@
-﻿using DidWeFeedTheCatToday.DTOs.Auth;
-using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Data;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {

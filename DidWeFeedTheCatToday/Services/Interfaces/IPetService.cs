@@ -1,5 +1,5 @@
-﻿using DidWeFeedTheCatToday.Common;
-using DidWeFeedTheCatToday.DTOs.Pets;
+﻿using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 
 namespace DidWeFeedTheCatToday.Services.Interfaces
 {

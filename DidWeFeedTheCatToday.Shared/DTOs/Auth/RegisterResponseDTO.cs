@@ -1,6 +1,6 @@
-﻿using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Shared.Enums;
 
-namespace DidWeFeedTheCatToday.DTOs.Auth
+namespace DidWeFeedTheCatToday.Shared.DTOs.Auth
 {
     public class RegisterResponseDTO
     {

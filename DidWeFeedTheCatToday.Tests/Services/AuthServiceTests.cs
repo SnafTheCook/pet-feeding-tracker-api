@@ -1,18 +1,13 @@
 ﻿using DidWeFeedTheCatToday.Data;
-using DidWeFeedTheCatToday.DTOs.Auth;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Services.Interfaces;
+using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {

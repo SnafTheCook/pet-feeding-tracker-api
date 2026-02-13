@@ -1,6 +1,6 @@
-﻿using DidWeFeedTheCatToday.Common;
-using DidWeFeedTheCatToday.DTOs.Auth;
-using DidWeFeedTheCatToday.Services.Interfaces;
+﻿using DidWeFeedTheCatToday.Services.Interfaces;
+using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DidWeFeedTheCatToday.Controllers

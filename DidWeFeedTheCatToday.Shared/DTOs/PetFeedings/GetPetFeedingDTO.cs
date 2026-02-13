@@ -1,6 +1,6 @@
-﻿using DidWeFeedTheCatToday.DTOs.Feedings;
+﻿using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 
-namespace DidWeFeedTheCatToday.DTOs.PetFeedings
+namespace DidWeFeedTheCatToday.Shared.DTOs.PetFeedings
 {
     public class GetPetFeedingDTO
     {

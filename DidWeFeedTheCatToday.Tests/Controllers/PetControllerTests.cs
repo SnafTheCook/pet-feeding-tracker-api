@@ -1,16 +1,10 @@
-﻿using DidWeFeedTheCatToday.Common;
-using DidWeFeedTheCatToday.Controllers;
-using DidWeFeedTheCatToday.DTOs.Pets;
-using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Controllers;
 using DidWeFeedTheCatToday.Services.Interfaces;
+using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DidWeFeedTheCatToday.Tests.Controllers
 {

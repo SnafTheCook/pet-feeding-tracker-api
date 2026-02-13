@@ -1,15 +1,9 @@
 ﻿using DidWeFeedTheCatToday.Data;
-using DidWeFeedTheCatToday.DTOs.Feedings;
-using DidWeFeedTheCatToday.DTOs.PetFeedings;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
+using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {

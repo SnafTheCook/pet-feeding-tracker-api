@@ -1,4 +1,4 @@
-﻿namespace DidWeFeedTheCatToday.Common
+﻿namespace DidWeFeedTheCatToday.Shared.Common
 {
     public class ApiResponse<T>
     {
