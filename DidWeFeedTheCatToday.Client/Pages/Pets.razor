@@ -1,0 +1,46 @@
+﻿@page "/pets"
+@using DidWeFeedTheCatToday.Shared.DTOs.Pets
+@using DidWeFeedTheCatToday.Client.Services
+@inject PetService PetClient
+
+<PageTitle>Our Pets</PageTitle>
+
+<h1>Pets</h1>
+
+@if (pets == null)
+{
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+else if (!pets.Any())
+{
+    <p>Add your pets to see them here!</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var pet in pets)
+        {
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@pet.Name</h5>
+                        <p class="card-text">Age: @pet.Age</p>
+                        <p class="text-muted">@pet.AdditionalInformation</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<GetPetDTO>? pets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pets = await PetClient.GetPetsAsync();
+    }
+
+}
