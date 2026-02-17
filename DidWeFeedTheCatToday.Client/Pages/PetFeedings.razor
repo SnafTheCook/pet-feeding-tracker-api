@@ -5,7 +5,52 @@
 @attribute [Authorize]
 @inject PetService PetClient
 
+<PageTitle>Feeding History</PageTitle>
 
-@code {
+<h1>Feeding History</h1>
+<p>This data is protected. Only logged-in users can see this.</p>
 
+@if (petFeedings == null)
+{
+    <p>Loading feeding history...</p>
+}
+else
+{
+    @foreach (var item in petFeedings)
+    {
+        <div class="card mb-3 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">@item.Name</h4>
+            </div>
+            <div class="card-body">
+                <h6>Recent Feedings:</h6>
+                @if (item.FeedingTimes != null && item.FeedingTimes.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var feeding in item.FeedingTimes)
+                        {
+                            <li class="list-group-item">
+                                Fed at: @feeding.FeedingTime?.ToLocalTime().ToString("g")
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No feedings recorded yet.</p>
+                }
+            </div>
+        </div>
+    }
+}
+
+
+@code 
+{
+    private List<GetPetFeedingDTO>? petFeedings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        petFeedings = await PetClient.GetPetFeedingsAsync();
+    }
 }

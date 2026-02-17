@@ -22,6 +22,8 @@ namespace DidWeFeedTheCatToday.Client.Services
             {
                 await js.InvokeVoidAsync("localStorage.setItem", "authToken", result.Data.AccessToken);
                 await js.InvokeVoidAsync("localStorage.setItem", "refreshToken", result.Data.RefreshToken);
+
+                ((CustomAuthStateProvider)authProvider).NotifyUserLogin(result.Data.AccessToken);
                 return true;
             }
 
