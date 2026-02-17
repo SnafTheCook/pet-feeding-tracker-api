@@ -1,11 +1,13 @@
-﻿using DidWeFeedTheCatToday.Shared.Common;
+﻿using DidWeFeedTheCatToday.Client.Providers;
+using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Auth;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.Net.Http.Json;
 
 namespace DidWeFeedTheCatToday.Client.Services
 {
-    public class AuthService(HttpClient http, IJSRuntime js)
+    public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProvider authProvider)
     {
         public async Task<bool> Login(UserDTO loginDto)
         {
@@ -30,6 +32,8 @@ namespace DidWeFeedTheCatToday.Client.Services
         {
             await js.InvokeVoidAsync("localStorage.removeItem", "authToken");
             await js.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
+
+            ((CustomAuthStateProvider)authProvider).NotifyUserLogout();
         }
     }
 }
