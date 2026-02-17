@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using System.Net.Http.Json;
 
@@ -19,5 +20,19 @@ namespace DidWeFeedTheCatToday.Client.Services
 				return new List<GetPetDTO>();
 			}
         }
+
+		public async Task<List<GetPetFeedingDTO>> GetPetFeedingsAsync()
+		{
+			try
+			{
+				var response = await http.GetFromJsonAsync<ApiResponse<IEnumerable<GetPetFeedingDTO>>>("api/pet-feedings");
+				return response?.Data?.ToList() ?? new List<GetPetFeedingDTO>();
+			}
+			catch(Exception e)
+			{
+				Console.WriteLine($"Error fetching pet feedings: {e.Message}");
+				return new List<GetPetFeedingDTO>();
+			}
+		}
     }
 }
