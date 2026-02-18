@@ -14,7 +14,20 @@ namespace DidWeFeedTheCatToday.Client.Providers
             if (string.IsNullOrWhiteSpace(token))
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
+            var claims = ParseClaimsFromJwt(token);
+
+            var expiryClaim = claims.FirstOrDefault(claim => claim.Type == "exp");
+            if (expiryClaim != null)
+            {
+                var datetime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiryClaim.Value));
+                if (datetime.UtcDateTime <= DateTime.UtcNow)
+                {
+                    await js.InvokeVoidAsync("localStorage.removeItem", "authToken");
+                    return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                }
+            }
+
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt")));
         }
 
         public void NotifyUserLogin(string token)
