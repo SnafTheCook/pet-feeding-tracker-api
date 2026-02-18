@@ -39,9 +39,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddCors(policy =>
 {
-    policy.AddPolicy("CorsPolicy", policy =>
+    policy.AddPolicy("BlazorCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins("http://localhost:3000", "https://localhost:7200", "http://localhost:5240")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
@@ -78,7 +78,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors();
+app.UseCors("BlazorCorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();

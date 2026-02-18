@@ -1,0 +1,43 @@
+﻿@page "/login"
+@using DidWeFeedTheCatToday.Shared.DTOs.Auth
+@using DidWeFeedTheCatToday.Client.Services
+@inject AuthService AuthClient
+@inject NavigationManager NavManager
+
+<h3>Login</h3>
+
+<div class="card p-4" style="max-width: 400px;">
+    <div class="mb-3">
+        <label>Username</label>
+        <input @bind="userDto.Username" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input @bind="userDto.Password" type="password" class="form-control" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <button class="btn btn-primary" @onclick="HandleLogin">Sign In</button>
+</div>
+
+@code {
+    private UserDTO userDto = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        var success = await AuthClient.Login(userDto);
+        if (success)
+        {
+            NavManager.NavigateTo("/pets");
+        }
+        else
+        {
+            errorMessage = "Invalid credentials. Try again.";
+        }
+    }
+}
