@@ -38,6 +38,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             {
                 AccessToken = CreateToken(user),
                 RefreshToken = await GenerateAndSaveRefreshTokenAsync(user),
+                UserId = user.Id,
+                RefreshTokenId = user.RefreshTokenId!.Value
             };
         }
 
