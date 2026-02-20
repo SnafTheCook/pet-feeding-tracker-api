@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Services.Implementations
 {
     public class PetService(AppDbContext context) : IPetService
     {
+        /// <summary>
+        /// Retrieves a list of all pets.
+        /// </summary>
+        /// <returns>A collection of <see cref="GetPetDTO"/>. Returns an empty list if no pets exist.</returns>
         public async Task<IEnumerable<GetPetDTO>> GetAllPetsAsync()
         {
             return await context.Pets
@@ -17,6 +21,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves a specific pet by its unique identifier.
+        /// </summary>
+        /// <param name="id">The primary key of the pet to retrieve.</param>
+        /// <returns>A <see cref="GetPetDTO"/> if found; otherwise, null.</returns>
         public async Task<GetPetDTO?> GetPetByIdAsync(int id)
         {
             var pet = await context.Pets.FindAsync(id);
