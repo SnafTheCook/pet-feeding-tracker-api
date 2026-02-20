@@ -36,6 +36,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return PetToGetPetDTO(pet);
         }
 
+        /// <summary>
+        /// Persists a new pet record and assigns an initial creation timestamp.
+        /// </summary>
+        /// <param name="petToAdd">The data required to create the pet.</param>
+        /// <returns><see cref="GetPetDTO"/> representing the newly created pet, including its generated ID.</returns>
         public async Task<GetPetDTO> AddPetAsync(CommandPetDTO petToAdd)
         {
             var pet = new Pet
