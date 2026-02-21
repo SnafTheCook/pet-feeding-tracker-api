@@ -58,6 +58,12 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return PetToGetPetDTO(pet);
         }
 
+        /// <summary>
+        /// Updates an existing pet record with concurrency conflict detection.
+        /// </summary>
+        /// <param name="id">The ID of the pet to update.</param>
+        /// <param name="petToOverride">The updated pet data.</param>
+        /// <returns>A <see cref="ServiceResult"/> indicating success or the specific cause of failure.</returns>
         public async Task<ServiceResult> OverridePetAsync(int id, CommandPetDTO petToOverride)
         {
             var petRequested = await context.Pets.FindAsync(id);
