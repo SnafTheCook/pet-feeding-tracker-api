@@ -87,6 +87,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return ServiceResult.Ok();
         }
 
+        /// <summary>
+        /// Removes an existing pet record.
+        /// </summary>
+        /// <param name="id">The ID of the pet to update.</param>
+        /// <returns>A <see cref="bool"/> indicating success or failure.</returns>
         public async Task<bool> DeletePetAsync(int id)
         {
             var petItem = await context.Pets.FindAsync(id);
