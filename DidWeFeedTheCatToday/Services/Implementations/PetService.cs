@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Services.Implementations
 {
     public class PetService(AppDbContext context) : IPetService
     {
+        /// <summary>
+        /// Retrieves a list of all pets.
+        /// </summary>
+        /// <returns>A collection of <see cref="GetPetDTO"/>. Returns an empty list if no pets exist.</returns>
         public async Task<IEnumerable<GetPetDTO>> GetAllPetsAsync()
         {
             return await context.Pets
@@ -17,6 +21,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves a specific pet by its unique identifier.
+        /// </summary>
+        /// <param name="id">The primary key of the pet to retrieve.</param>
+        /// <returns>A <see cref="GetPetDTO"/> if found; otherwise, null.</returns>
         public async Task<GetPetDTO?> GetPetByIdAsync(int id)
         {
             var pet = await context.Pets.FindAsync(id);
@@ -27,6 +36,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return PetToGetPetDTO(pet);
         }
 
+        /// <summary>
+        /// Persists a new pet record and assigns an initial creation timestamp.
+        /// </summary>
+        /// <param name="petToAdd">The data required to create the pet.</param>
+        /// <returns><see cref="GetPetDTO"/> representing the newly created pet, including its generated ID.</returns>
         public async Task<GetPetDTO> AddPetAsync(CommandPetDTO petToAdd)
         {
             var pet = new Pet
@@ -44,6 +58,12 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return PetToGetPetDTO(pet);
         }
 
+        /// <summary>
+        /// Updates an existing pet record with concurrency conflict detection.
+        /// </summary>
+        /// <param name="id">The ID of the pet to update.</param>
+        /// <param name="petToOverride">The updated pet data.</param>
+        /// <returns>A <see cref="ServiceResult"/> indicating success or the specific cause of failure.</returns>
         public async Task<ServiceResult> OverridePetAsync(int id, CommandPetDTO petToOverride)
         {
             var petRequested = await context.Pets.FindAsync(id);
@@ -67,6 +87,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return ServiceResult.Ok();
         }
 
+        /// <summary>
+        /// Removes an existing pet record.
+        /// </summary>
+        /// <param name="id">The ID of the pet to update.</param>
+        /// <returns>A <see cref="bool"/> indicating success or failure.</returns>
         public async Task<bool> DeletePetAsync(int id)
         {
             var petItem = await context.Pets.FindAsync(id);
