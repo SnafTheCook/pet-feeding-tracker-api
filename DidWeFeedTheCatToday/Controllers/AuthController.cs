@@ -9,6 +9,11 @@ namespace DidWeFeedTheCatToday.Controllers
     [ApiController]
     public class AuthController(IAuthServices authService) : ControllerBase
     {
+        /// <summary>
+        /// Handles user registration.
+        /// </summary>
+        /// <param name="request"><see cref="UserDTO"/> with username and password</param>
+        /// <returns>API response containing status and new user's profile or and error message</returns>
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<RegisterResponseDTO>>> Register(UserDTO request)
         {
