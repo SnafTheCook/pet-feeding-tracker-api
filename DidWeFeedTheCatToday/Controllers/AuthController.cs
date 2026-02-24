@@ -25,6 +25,11 @@ namespace DidWeFeedTheCatToday.Controllers
             return Ok(ApiResponse<RegisterResponseDTO>.Ok(result));
         }
 
+        /// <summary>
+        /// Handles user login.
+        /// </summary>
+        /// <param name="request"><see cref="UserDTO"/> with username and password</param>
+        /// <returns>API response containing status with Access Token and Refresh Token</returns>
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<TokenResponseDTO>>> Login(UserDTO request)
         {
@@ -36,6 +41,11 @@ namespace DidWeFeedTheCatToday.Controllers
             return Ok(ApiResponse<TokenResponseDTO>.Ok(result));
         }
 
+        /// <summary>
+        /// Handles token refresh.
+        /// </summary>
+        /// <param name="request"><see cref="RefreshTokenRequestDTO"/> containing user's Refresh Token</param>
+        /// <returns>API response containing status with Access Token and Refresh Token</returns>
         [HttpPost("refreshToken")]
         public async Task<ActionResult<ApiResponse<TokenResponseDTO>>> RefreshToken(RefreshTokenRequestDTO request)
         {
