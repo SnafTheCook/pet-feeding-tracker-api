@@ -34,5 +34,11 @@ namespace DidWeFeedTheCatToday.Client.Services
 				return new List<GetPetFeedingDTO>();
 			}
 		}
+
+        public async Task<bool> AddPetAsync(CommandPetDTO petToAdd)
+        {
+            var response = await http.PostAsJsonAsync("api/pets", petToAdd);
+            return response.IsSuccessStatusCode;
+        }
     }
 }
