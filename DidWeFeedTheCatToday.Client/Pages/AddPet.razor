@@ -1,0 +1,51 @@
+﻿@page "/add-pet"
+@using DidWeFeedTheCatToday.Shared.DTOs.Pets
+@using DidWeFeedTheCatToday.Client.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject PetService PetClient
+@inject NavigationManager NavManager
+
+<h3>Add a New Pet</h3>
+
+<div class="card p-4 shadow-sm" style="max-width: 500px;">
+    <EditForm Model="@newPet" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <InputText @bind-Value="newPet.Name" class="form-control" />
+            <ValidationMessage For="@(() => newPet.Name)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Age (Years)</label>
+            <InputNumber @bind-Value="newPet.Age" class="form-control" />
+            <ValidationMessage For="@(() => newPet.Age)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Additional Info</label>
+            <InputTextArea @bind-Value="newPet.AdditionalInformation" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Save Pet</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </EditForm>
+</div>
+
+@code {
+    private CommandPetDTO newPet = new() { Name = "" };
+
+    private async Task HandleSubmit()
+    {
+        var success = await PetClient.AddPetAsync(newPet);
+        if (success)
+        {
+            NavManager.NavigateTo("/pets");
+        }
+    }
+
+    private void Cancel() => NavManager.NavigateTo("/pets");
+}
