@@ -28,6 +28,11 @@ else
                         <h5 class="card-title">@pet.Name</h5>
                         <p class="card-text">Age: @pet.Age</p>
                         <p class="text-muted">@pet.AdditionalInformation</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => HandleDelete(pet.Id)">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -43,4 +48,12 @@ else
         pets = await PetClient.GetPetsAsync();
     }
 
+    private async Task HandleDelete(int id)
+    {
+        var success = await PetClient.DeletePetAsync(id);
+        if (success)
+        {
+            pets?.RemoveAll(pet => pet.Id == id);
+        }
+    }
 }
