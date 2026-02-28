@@ -40,5 +40,11 @@ namespace DidWeFeedTheCatToday.Client.Services
             var response = await http.PostAsJsonAsync("api/pets", petToAdd);
             return response.IsSuccessStatusCode;
         }
+
+		public async Task<bool> DeletePetAsync(int id)
+		{
+			var response = await http.DeleteAsync($"api/pets/{id}");
+			return response.IsSuccessStatusCode;
+		}
     }
 }
