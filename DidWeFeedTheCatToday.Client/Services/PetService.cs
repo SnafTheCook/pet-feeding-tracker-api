@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Shared.Common;
+using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using System.Net.Http.Json;
@@ -44,6 +45,12 @@ namespace DidWeFeedTheCatToday.Client.Services
 		public async Task<bool> DeletePetAsync(int id)
 		{
 			var response = await http.DeleteAsync($"api/pets/{id}");
+			return response.IsSuccessStatusCode;
+		}
+
+		public async Task<bool> AddFeedingAsync(PostFeedingDTO feeding)
+		{
+			var response = await http.PostAsJsonAsync("api/feedings", feeding);
 			return response.IsSuccessStatusCode;
 		}
     }

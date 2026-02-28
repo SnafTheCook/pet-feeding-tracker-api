@@ -1,5 +1,6 @@
 ﻿@page "/pets"
 @using DidWeFeedTheCatToday.Shared.DTOs.Pets
+@using DidWeFeedTheCatToday.Shared.DTOs.Feedings
 @using DidWeFeedTheCatToday.Client.Services
 @inject PetService PetClient
 
@@ -29,6 +30,9 @@ else
                         <p class="card-text">Age: @pet.Age</p>
                         <p class="text-muted">@pet.AdditionalInformation</p>
                         <div class="d-flex justify-content-between align-items-center mt-3">
+                            <button class="btn btn-sm btn-success" @onclick="() => HandleFeed(pet.Id)">
+                                Feed me!
+                            </button>
                             <button class="btn btn-sm btn-outline-danger" @onclick="() => HandleDelete(pet.Id)">
                                 Delete
                             </button>
@@ -41,6 +45,8 @@ else
 }
 
 @code {
+    private bool showToast = false;
+    private string toastMessage = "Unhadled exception.";
     private List<GetPetDTO>? pets;
 
     protected override async Task OnInitializedAsync()
@@ -54,6 +60,42 @@ else
         if (success)
         {
             pets?.RemoveAll(pet => pet.Id == id);
+            await ShowToast("Pet deleted successfully!");
         }
     }
+
+    private async Task HandleFeed(int petId)
+    {
+        var feeding = new PostFeedingDTO { FeedingTime = DateTime.UtcNow, PetId = petId };
+        var success = await PetClient.AddFeedingAsync(feeding);
+
+        if (success)
+            await ShowToast("Pet fed successfully!");
+        else
+            await ShowToast();
+    }
+
+    private async Task ShowToast(string message = "Something went wrong. Try again later.")
+    {
+        toastMessage = message;
+        showToast = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        showToast = false;
+    }
+}
+
+@if (showToast)
+{
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast show align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @toastMessage
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => showToast = false"></button>
+            </div>
+        </div>
+    </div>
 }
