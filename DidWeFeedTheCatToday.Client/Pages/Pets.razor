@@ -70,11 +70,18 @@ else
 
     private async Task HandleFeed(int petId)
     {
-        var feeding = new PostFeedingDTO { FeedingTime = DateTime.UtcNow, PetId = petId };
+        var feedingTime = DateTime.UtcNow;
+        var feeding = new PostFeedingDTO { FeedingTime = feedingTime, PetId = petId };
         var success = await PetClient.AddFeedingAsync(feeding);
 
         if (success)
+        {
+            var petToUpdate = pets?.FirstOrDefault(pet => pet.Id == petId);
+            if (petToUpdate != null)
+                petToUpdate.LastFed = feedingTime;
+
             await ShowToast("Pet fed successfully!");
+        }
         else
             await ShowToast(isError: true);
     }
