@@ -47,6 +47,7 @@ else
 @code {
     private bool showToast = false;
     private string toastMessage = "Unhadled exception.";
+    private string toastClass = "bg-success";
     private List<GetPetDTO>? pets;
 
     protected override async Task OnInitializedAsync()
@@ -62,6 +63,8 @@ else
             pets?.RemoveAll(pet => pet.Id == id);
             await ShowToast("Pet deleted successfully!");
         }
+        else
+            await ShowToast(isError: true);
     }
 
     private async Task HandleFeed(int petId)
@@ -72,12 +75,13 @@ else
         if (success)
             await ShowToast("Pet fed successfully!");
         else
-            await ShowToast();
+            await ShowToast(isError: true);
     }
 
-    private async Task ShowToast(string message = "Something went wrong. Try again later.")
+    private async Task ShowToast(string message = "Something went wrong. Try again later.", bool isError = false)
     {
         toastMessage = message;
+        toastClass = isError ? "bg-danger" : "bg-success";
         showToast = true;
         StateHasChanged();
 
@@ -90,7 +94,7 @@ else
 @if (showToast)
 {
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div class="toast show align-items-center text-white bg-success border-0" role="alert">
+        <div class="toast show align-items-center text-white @toastClass border-0" role="alert">
             <div class="d-flex">
                 <div class="toast-body">
                     @toastMessage
