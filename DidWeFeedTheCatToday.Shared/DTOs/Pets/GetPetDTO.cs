@@ -1,4 +1,6 @@
-﻿namespace DidWeFeedTheCatToday.Shared.DTOs.Pets
+﻿using DidWeFeedTheCatToday.Shared.Enums;
+
+namespace DidWeFeedTheCatToday.Shared.DTOs.Pets
 {
     public class GetPetDTO
     {
@@ -8,5 +10,6 @@
         public int? Age { get; set; }
         public string? AdditionalInformation { get; set; }
         public DateTime? LastFed {  get; set; }
+        public HungerStatus Status { get; set; }
     }
 }

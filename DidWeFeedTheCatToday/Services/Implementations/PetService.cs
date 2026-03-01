@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
+using DidWeFeedTheCatToday.Shared.Enums;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
@@ -15,10 +16,28 @@ namespace DidWeFeedTheCatToday.Services.Implementations
         /// <returns>A collection of <see cref="GetPetDTO"/>. Returns an empty list if no pets exist.</returns>
         public async Task<IEnumerable<GetPetDTO>> GetAllPetsAsync()
         {
+            var now = DateTime.UtcNow;
+
             return await context.Pets
-                .Include(p => p.FeedingTimes)
                 .AsNoTracking()
-                .Select(p => PetToGetPetDTO(p))
+                .Select(pet => new GetPetDTO
+                {
+                    Id = pet.Id,
+                    Name = pet.Name,
+                    Age = pet.Age,
+                    AdditionalInformation = pet.AdditionalInformation,
+                    CreationDate = pet.CreationDate,
+
+                    LastFed = pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(),
+
+                    Status = CalculateHunger(pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(), now)
+                })
                 .ToListAsync();
         }
 
@@ -29,12 +48,29 @@ namespace DidWeFeedTheCatToday.Services.Implementations
         /// <returns>A <see cref="GetPetDTO"/> if found; otherwise, null.</returns>
         public async Task<GetPetDTO?> GetPetByIdAsync(int id)
         {
-            var pet = await context.Pets.FindAsync(id);
+            var now = DateTime.UtcNow;
 
-            if (pet == null)
-                return null;
+            return await context.Pets
+                .Where(pet => pet.Id == id)
+                .Select(pet => new GetPetDTO
+                {
+                    Id = pet.Id,
+                    Name = pet.Name,
+                    Age = pet.Age,
+                    AdditionalInformation = pet.AdditionalInformation,
+                    CreationDate = pet.CreationDate,
 
-            return PetToGetPetDTO(pet);
+                    LastFed = pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(),
+
+                    Status = CalculateHunger(pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(), now)
+                })
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -56,7 +92,14 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             context.Pets.Add(pet);
             await context.SaveChangesAsync();
 
-            return PetToGetPetDTO(pet);
+            return new GetPetDTO
+            {
+                Id = pet.Id,
+                Name = pet.Name,
+                Age = pet.Age,
+                AdditionalInformation = pet.AdditionalInformation,
+                CreationDate = pet.CreationDate
+            };
         }
 
         /// <summary>
@@ -106,17 +149,19 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return true;
         }
 
-        private static GetPetDTO PetToGetPetDTO(Pet pet) =>
-            new GetPetDTO
+        private static HungerStatus CalculateHunger(DateTime? lastFed, DateTime now)
+        {
+            if (lastFed == null) return HungerStatus.Starving;
+
+            var hoursSinceLastFeeding = (now - lastFed.Value).TotalHours;
+
+            return hoursSinceLastFeeding switch
             {
-                Id = pet.Id,
-                Name = pet.Name,
-                Age = pet.Age,
-                AdditionalInformation = pet.AdditionalInformation,
-                CreationDate = pet.CreationDate,
-                LastFed = pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .FirstOrDefault()?.FeedingTime
+                < 2 => HungerStatus.Full,
+                < 5 => HungerStatus.Content,
+                < 10 => HungerStatus.Hungry,
+                _ => HungerStatus.Starving,
             };
+        }
     }
 }

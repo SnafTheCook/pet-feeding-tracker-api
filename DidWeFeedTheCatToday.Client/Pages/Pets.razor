@@ -2,6 +2,7 @@
 @using DidWeFeedTheCatToday.Shared.DTOs.Pets
 @using DidWeFeedTheCatToday.Shared.DTOs.Feedings
 @using DidWeFeedTheCatToday.Client.Services
+@using DidWeFeedTheCatToday.Shared.Enums
 @inject PetService PetClient
 
 <PageTitle>Our Pets</PageTitle>
@@ -26,7 +27,10 @@ else
             <div class="col-md-4">
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">@pet.Name</h5>
+                        <h5 class="card-title">
+                            @pet.Name
+                            <span class="badge @GetBadgeClass(pet.Status)">@pet.Status</span>
+                        </h5>
                         <p class="card-text"> Age: @(pet.Age.HasValue ? pet.Age : "Not specified.")</p>
                         <p class="card-text"> Last feeding: @(pet.LastFed.HasValue ? pet.LastFed.Value.ToLocalTime().ToString("g") : "Not fed yet.")</p>
                         <p class="text-muted">@pet.AdditionalInformation</p>
@@ -78,7 +82,10 @@ else
         {
             var petToUpdate = pets?.FirstOrDefault(pet => pet.Id == petId);
             if (petToUpdate != null)
+            {
                 petToUpdate.LastFed = feedingTime;
+                petToUpdate.Status = HungerStatus.Full;
+            }
 
             await ShowToast("Pet fed successfully!");
         }
@@ -96,6 +103,18 @@ else
         await Task.Delay(3000);
         showToast = false;
         StateHasChanged();
+    }
+
+    private string GetBadgeClass(HungerStatus status)
+    {
+        return status switch
+        {
+            HungerStatus.Full => "bg-success",
+            HungerStatus.Content => "bg-info",
+            HungerStatus.Hungry => "bg-warning",
+            HungerStatus.Starving => "bg-danger",
+            _ => "bg-secondary"
+        };
     }
 }
 
