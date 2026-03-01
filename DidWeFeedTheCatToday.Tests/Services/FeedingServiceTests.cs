@@ -108,6 +108,11 @@ namespace DidWeFeedTheCatToday.Tests.Services
             result.PetId.Should().Be(testPet.Id);
 
             context.Feedings.Count().Should().Be(1);
+
+            _mockClientProxy.Verify(mock => mock.SendCoreAsync(
+                "PetFed", It.Is<object[]>(obj => obj.Length == 2 && (int)obj[0] == testPet.Id),
+                It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]
