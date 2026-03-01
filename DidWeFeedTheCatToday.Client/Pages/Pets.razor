@@ -3,6 +3,8 @@
 @using DidWeFeedTheCatToday.Shared.DTOs.Feedings
 @using DidWeFeedTheCatToday.Client.Services
 @using DidWeFeedTheCatToday.Shared.Enums
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IAsyncDisposable
 @inject PetService PetClient
 
 <PageTitle>Our Pets</PageTitle>
@@ -54,10 +56,32 @@ else
     private string toastMessage = "Unhadled exception.";
     private string toastClass = "bg-success";
     private List<GetPetDTO>? pets;
+    private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
     {
         pets = await PetClient.GetPetsAsync();
+
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl("http://localhost:8080/pet-hub")
+        .WithAutomaticReconnect()
+        .Build();
+
+        hubConnection.On<int, DateTime>("PetFed", async (petId, feedingTime) =>
+        {
+            await InvokeAsync(() =>
+            {
+                var pet = pets?.FirstOrDefault(p => p.Id == petId);
+                if (pet != null)
+                {
+                    pet.LastFed = feedingTime;
+                    pet.Status = HungerStatus.Full;
+                    StateHasChanged();
+                }
+            });
+        });
+
+        await hubConnection.StartAsync();
     }
 
     private async Task HandleDelete(int id)
@@ -79,16 +103,7 @@ else
         var success = await PetClient.AddFeedingAsync(feeding);
 
         if (success)
-        {
-            var petToUpdate = pets?.FirstOrDefault(pet => pet.Id == petId);
-            if (petToUpdate != null)
-            {
-                petToUpdate.LastFed = feedingTime;
-                petToUpdate.Status = HungerStatus.Full;
-            }
-
             await ShowToast("Pet fed successfully!");
-        }
         else
             await ShowToast(isError: true);
     }
@@ -115,6 +130,12 @@ else
             HungerStatus.Starving => "bg-danger",
             _ => "bg-secondary"
         };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+            await hubConnection.DisposeAsync();
     }
 }
 

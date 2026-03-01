@@ -3,10 +3,12 @@ using DidWeFeedTheCatToday.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
+using Microsoft.AspNetCore.SignalR;
+using DidWeFeedTheCatToday.Hubs;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
-    public class FeedingService(AppDbContext context) : IFeedingService
+    public class FeedingService(AppDbContext context, IHubContext<PetHub> hubContext) : IFeedingService
     {
         public async Task<IEnumerable<GetFeedingDTO>> GetFeedingsAsync()
         {
@@ -39,6 +41,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
 
             context.Feedings.Add(request);
             await context.SaveChangesAsync();
+
+            await hubContext.Clients.All.SendAsync("PetFed", request.PetId, request.FeedingTime);
 
             return FeedingToGetFeedingDTO(request);
         }

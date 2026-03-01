@@ -1,14 +1,28 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using FluentAssertions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {
     public class FeedingServiceTests
     {
+        private readonly Mock<IHubContext<PetHub>> _mockHubContext = new();
+        private readonly Mock<IHubClients> _mockClients = new();
+        private readonly Mock<IClientProxy> _mockClientProxy = new();
+
+        public FeedingServiceTests()
+        {
+            _mockHubContext.Setup(hub => hub.Clients).Returns(_mockClients.Object);
+            _mockClients.Setup(clients => clients.All).Returns(_mockClientProxy.Object);
+        }
+
         private AppDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -22,7 +36,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingsAsync_WhenFeedingsExist_ReturnsAllFeedingsAsDtos()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             var testFeeding1 = new Feeding { PetId = testPet.Id, FeedingTime = DateTime.UtcNow.AddMinutes(-5) };
@@ -43,7 +57,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingByIdAsync_WhenFeedingExists_ReturnsCorrectDto()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Pets.Add(testPet);
@@ -64,7 +78,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingByIdAsync_WhenFeedingDoesNotExist_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var result = await service.GetFeedingByIdAsync(9999);
 
@@ -75,7 +89,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task AddFeedingAsync_WhenPetExists_SavesFeedingAndReturnsDto()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
 
@@ -94,13 +108,18 @@ namespace DidWeFeedTheCatToday.Tests.Services
             result.PetId.Should().Be(testPet.Id);
 
             context.Feedings.Count().Should().Be(1);
+
+            _mockClientProxy.Verify(mock => mock.SendCoreAsync(
+                "PetFed", It.Is<object[]>(obj => obj.Length == 2 && (int)obj[0] == testPet.Id),
+                It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]
         public async Task AddFeedingAsync_WhenPetDoesNotExist_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var testFeedingDto = new PostFeedingDTO { PetId = 9999 };
 
@@ -113,7 +132,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeleteFeedingAsync_WhenFeedingExists_RemovesFromDatabaseAndReturnsTrue()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Pets.Add(testPet);
@@ -141,7 +160,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeleteFeedingAsync_WhenFeedingDoesNotExist_ReturnsFalse()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context);
+            var service = new FeedingService(context, _mockHubContext.Object);
 
             var result = await service.DeleteFeedingAsync(9999);
             result.Should().BeFalse();
