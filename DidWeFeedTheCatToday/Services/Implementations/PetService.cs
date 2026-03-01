@@ -16,6 +16,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
         public async Task<IEnumerable<GetPetDTO>> GetAllPetsAsync()
         {
             return await context.Pets
+                .Include(p => p.FeedingTimes)
                 .AsNoTracking()
                 .Select(p => PetToGetPetDTO(p))
                 .ToListAsync();
@@ -112,7 +113,10 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 Name = pet.Name,
                 Age = pet.Age,
                 AdditionalInformation = pet.AdditionalInformation,
-                CreationDate = pet.CreationDate
+                CreationDate = pet.CreationDate,
+                LastFed = pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .FirstOrDefault()?.FeedingTime
             };
     }
 }

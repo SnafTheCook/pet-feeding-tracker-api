@@ -7,5 +7,6 @@
         public DateTime? CreationDate { get; set; }
         public int? Age { get; set; }
         public string? AdditionalInformation { get; set; }
+        public DateTime? LastFed {  get; set; }
     }
 }
