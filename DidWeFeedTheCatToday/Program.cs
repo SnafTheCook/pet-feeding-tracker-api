@@ -1,4 +1,5 @@
 using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Middleware;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Services.Interfaces;
@@ -56,6 +57,7 @@ builder.Services.AddScoped<IFeedingService, FeedingService>();
 builder.Services.AddScoped<IPetFeedingQueryService, PetFeedingQueryService>();
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -84,5 +86,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PetHub>("/pet-hub");
 
 app.Run();
