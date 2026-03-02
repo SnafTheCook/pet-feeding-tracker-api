@@ -1,4 +1,5 @@
 ﻿@using DidWeFeedTheCatToday.Client.Services
+@implements IDisposable
 @inject AuthService AuthClient
 @inject NavigationManager NavManager
 @inject HttpClient Http
@@ -74,12 +75,36 @@
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private bool isApiUp = true;
+    private CancellationTokenSource cts = new();
 
     protected override async Task OnInitializedAsync()
     {
+        _ = PollHealthCheck();
+    }
+
+    private async Task PollHealthCheck()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
         try
         {
-            var response = await Http.GetAsync("health");
+            await CheckApiStatus();
+
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await CheckApiStatus();
+                StateHasChanged();
+            }
+        }
+        catch (OperationCanceledException){ }
+    }
+
+    private async Task CheckApiStatus()
+    {
+        try
+        {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var response = await Http.GetAsync("health", timeoutCts.Token);
             isApiUp = response.IsSuccessStatusCode;
         }
         catch
@@ -97,5 +122,11 @@
     {
         await AuthClient.Logout();
         NavManager.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
     }
 }
