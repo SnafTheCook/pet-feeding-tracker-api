@@ -1,6 +1,7 @@
 ﻿@using DidWeFeedTheCatToday.Client.Services
 @inject AuthService AuthClient
 @inject NavigationManager NavManager
+@inject HttpClient Http
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -9,6 +10,17 @@
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
+</div>
+
+<div class="px-3 py-2 text-center">
+    @if (isApiUp)
+    {
+        <span class="badge bg-success">● API Online</span>             
+    }
+    else
+    {
+        <span class="badge bg-danger">● API Offline</span>
+    }
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
@@ -60,6 +72,21 @@
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private bool isApiUp = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await Http.GetAsync("health");
+            isApiUp = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            isApiUp = false;
+        }
+    }
 
     private void ToggleNavMenu()
     {
