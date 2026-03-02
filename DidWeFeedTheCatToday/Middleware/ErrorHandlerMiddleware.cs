@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using DidWeFeedTheCatToday.Shared.Common;
+using System.Text.Json;
 
 namespace DidWeFeedTheCatToday.Middleware
 {
@@ -23,17 +24,18 @@ namespace DidWeFeedTheCatToday.Middleware
         private static Task HandleErrorAsync(HttpContext context, Exception exception)
         {
             var code = StatusCodes.Status500InternalServerError;
+            var message = "A server side error occured";
 
             if (exception is KeyNotFoundException)
+            {
                 code = StatusCodes.Status404NotFound;
-            else if (exception is ArgumentException)
-                code = StatusCodes.Status400BadRequest;
-
-
+                message = exception.Message;
+            }
+            
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = code;
 
-            var result = JsonSerializer.Serialize(new { error = exception.Message });
+            var result = JsonSerializer.Serialize(ApiResponse<string>.Fail(message));
 
             return context.Response.WriteAsync(result);
         }
