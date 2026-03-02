@@ -1,0 +1,48 @@
+﻿@using DidWeFeedTheCatToday.Shared.DTOs.Pets
+@using DidWeFeedTheCatToday.Shared.Enums
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">
+            @Pet.Name
+            <span class="badge @GetBadgeClass(Pet.Status)">@Pet.Status</span>
+        </h5>
+        <p class="card-text"> Age: @(Pet.Age.HasValue? Pet.Age: "Not specified.")</p>
+        <p class="card-text"> Last feeding: @(Pet.LastFed.HasValue? Pet.LastFed.Value.ToLocalTime().ToString("g") : "Not fed yet.")</p>
+        <p class="text-muted">@Pet.AdditionalInformation</p>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <button class="btn btn-sm btn-success" @onclick="OnFeed">
+                Feed me!
+            </button>
+            <button class="btn btn-sm btn-outline-danger" @onclick="OnDelete">
+                Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public GetPetDTO Pet { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<int> OnFeedRequest { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnDeleteRequest { get; set; }
+
+    private async Task OnFeed() => await OnFeedRequest.InvokeAsync(Pet.Id);
+    private async Task OnDelete() => await OnDeleteRequest.InvokeAsync(Pet.Id);
+
+    private string GetBadgeClass(HungerStatus status)
+    {
+        return status switch
+        {
+            HungerStatus.Full => "bg-success",
+            HungerStatus.Content => "bg-info",
+            HungerStatus.Hungry => "bg-warning",
+            HungerStatus.Starving => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
