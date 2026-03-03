@@ -58,6 +58,8 @@ builder.Services.AddScoped<IPetFeedingQueryService, PetFeedingQueryService>();
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSignalR();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
 
 var app = builder.Build();
 
@@ -87,5 +89,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<PetHub>("/pet-hub");
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -1,6 +1,8 @@
 ﻿@using DidWeFeedTheCatToday.Client.Services
+@implements IDisposable
 @inject AuthService AuthClient
 @inject NavigationManager NavManager
+@inject HttpClient Http
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -9,6 +11,17 @@
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
+</div>
+
+<div class="px-3 py-2 text-center">
+    @if (isApiUp)
+    {
+        <span class="badge bg-success">● API Online</span>             
+    }
+    else
+    {
+        <span class="badge bg-danger">● API Offline</span>
+    }
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
@@ -61,6 +74,45 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    private bool isApiUp = true;
+    private CancellationTokenSource cts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ = PollHealthCheck();
+    }
+
+    private async Task PollHealthCheck()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            await CheckApiStatus();
+
+            while (await timer.WaitForNextTickAsync(cts.Token))
+            {
+                await CheckApiStatus();
+                StateHasChanged();
+            }
+        }
+        catch (OperationCanceledException){ }
+    }
+
+    private async Task CheckApiStatus()
+    {
+        try
+        {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            var response = await Http.GetAsync("health", timeoutCts.Token);
+            isApiUp = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            isApiUp = false;
+        }
+    }
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
@@ -70,5 +122,11 @@
     {
         await AuthClient.Logout();
         NavManager.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        cts.Cancel();
+        cts.Dispose();
     }
 }
