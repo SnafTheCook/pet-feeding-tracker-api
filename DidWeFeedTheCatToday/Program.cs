@@ -1,3 +1,4 @@
+using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Middleware;
@@ -14,6 +15,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var appSettings = new AppSettings();
+builder.Configuration.GetSection("AppSettings").Bind(appSettings);
 
 builder.Services.AddControllers(options =>
 {
@@ -29,12 +32,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+        ValidIssuer = appSettings.Issuer,
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["AppSettings:Audience"],
+        ValidAudience = appSettings.Audience,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.Token))
     };
 });
 
@@ -60,6 +63,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSignalR();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 var app = builder.Build();
 
