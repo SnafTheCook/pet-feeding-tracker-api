@@ -9,16 +9,20 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using DidWeFeedTheCatToday.Shared.DTOs.Auth;
+using DidWeFeedTheCatToday.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
     public class AuthService(
         AppDbContext context, 
-        IConfiguration configuration, 
+        IOptions<AppSettings> options, 
         IRequestContext requestContext, 
         ILogger<AuthService> logger
         ) : IAuthServices
     {
+        private AppSettings _settings = options.Value;
+
         public async Task<TokenResponseDTO?> LoginAsync(UserDTO request)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == request.Username.ToLower());
@@ -104,11 +108,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             };
 
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.Token));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
             var tokenDescriptor = new JwtSecurityToken(
-                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: configuration.GetValue<string>("AppSettings:Audience"),
+                issuer: _settings.Issuer,
+                audience: _settings.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: creds
