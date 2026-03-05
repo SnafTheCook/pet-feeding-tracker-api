@@ -1,3 +1,4 @@
+using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Middleware;
@@ -60,6 +61,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSignalR();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 var app = builder.Build();
 
