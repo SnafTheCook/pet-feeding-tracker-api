@@ -1,4 +1,5 @@
-﻿using DidWeFeedTheCatToday.Data;
+﻿using DidWeFeedTheCatToday.Configuration;
+using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Services.Interfaces;
@@ -7,13 +8,14 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {
     public class AuthServiceTests
     {
-        private readonly Mock<IConfiguration> _mockConfig = new();
+        private readonly Mock<IOptions<AppSettings>> _mockConfig = new();
         private readonly Mock<IRequestContext> _mockRequestContext = new();
         private readonly Mock<ILogger<AuthService>> _mockLogger = new();
 
