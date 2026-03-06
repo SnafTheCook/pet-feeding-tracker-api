@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Controllers
     [ApiController]
     public class FeedingController(IFeedingService feedingService) : ControllerBase
     {
+        /// <summary>
+        /// Retrieves complete history of feedings.
+        /// </summary>
+        /// <returns>API reponse containing a collection of <see cref="GetFeedingDTO"/></returns>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<GetFeedingDTO>>>> GetFeedings()
         {
@@ -16,7 +20,11 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return Ok(ApiResponse<IEnumerable<GetFeedingDTO>>.Ok(result));
         }
-
+        /// <summary>
+        /// Retrieves a unique feeding.
+        /// </summary>
+        /// <param name="id">Unique identifier of a feeding.</param>
+        /// <returns>API response containing a single <see cref="GetFeedingDTO"/></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetFeedingDTO>>> GetFeedingById(int id)
         {
