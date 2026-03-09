@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Controllers
     [ApiController]
     public class PetController(IPetService petService) : ControllerBase
     {
+        /// <summary>
+        /// Retrieves all pets from the database.
+        /// </summary>
+        /// <returns>API response containing a collection of <see cref="GetPetDTO"/>.</returns>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<GetPetDTO>>>> GetPets()
         {
@@ -16,7 +20,11 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return Ok(ApiResponse<IEnumerable<GetPetDTO>>.Ok(result));
         }
-
+        /// <summary>
+        /// Retreives a unique pet.
+        /// </summary>
+        /// <param name="id">Unique identifier of the pet.</param>
+        /// <returns>API response containg a single <see cref="GetPetDTO"/>.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetPetDTO>>> GetPetById(int id)
         {
@@ -27,7 +35,11 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return Ok(ApiResponse<GetPetDTO>.Ok(result));
         }
-
+        /// <summary>
+        /// Persists a pet.
+        /// </summary>
+        /// <param name="petDTO">Pet's information.</param>
+        /// <returns>API response containing the persisted <see cref="GetPetDTO"/>.</returns>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<GetPetDTO>>> PostPet(CommandPetDTO petDTO)
         {
@@ -35,7 +47,12 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return CreatedAtAction(nameof(GetPetById), new { id = result.Id }, ApiResponse<GetPetDTO>.Ok(result));
         }
-
+        /// <summary>
+        /// Updates an existing pet.
+        /// </summary>
+        /// <param name="id">Unique pet identifier.</param>
+        /// <param name="petDTO">Complete pet data set.</param>
+        /// <returns>No content (204) if succeeded.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPet(int id, CommandPetDTO petDTO)
         {
@@ -55,7 +72,11 @@ namespace DidWeFeedTheCatToday.Controllers
             return NoContent(); //204
 
         }
-
+        /// <summary>
+        /// Removes an existing pet.
+        /// </summary>
+        /// <param name="id">Unique pet identifier.</param>
+        /// <returns>No content (204) if succeeded.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePet(int id)
         {
