@@ -15,9 +15,19 @@ namespace DidWeFeedTheCatToday.Tests.Services
 {
     public class AuthServiceTests
     {
-        private readonly Mock<IOptions<AppSettings>> _mockConfig = new();
         private readonly Mock<IRequestContext> _mockRequestContext = new();
         private readonly Mock<ILogger<AuthService>> _mockLogger = new();
+        private readonly IOptions<AppSettings> _options;
+
+        public AuthServiceTests()
+        {
+            _options = Options.Create(new AppSettings()
+            {
+                Token = "TestTokenVeryLongTokenForTestPurposeOnly",
+                Issuer = "TestIssuer",
+                Audience = "TestAudience"
+            });
+        }
 
         private AppDbContext GetDbContext()
         {
@@ -32,7 +42,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task RegisterAsync_WhenUsernameExists_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new AuthService(context, _mockConfig.Object, _mockRequestContext.Object, _mockLogger.Object);
+            var service = new AuthService(context, _options, _mockRequestContext.Object, _mockLogger.Object);
             var request = new UserDTO { Username = "ExistingUser", Password = "Password123!" };
 
             context.Users.Add(new User { Username = "ExistingUser" });
