@@ -24,7 +24,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         {
             _options = Options.Create(new AppSettings()
             {
-                Token = "TestTokenVeryLongTokenForTestPurposeOnly",
+                Token = "TestTokenVeryLongTokenForTestinghatNeedsToBe64CharactersLong!!!!",
                 Issuer = "TestIssuer",
                 Audience = "TestAudience"
             });
@@ -75,6 +75,24 @@ namespace DidWeFeedTheCatToday.Tests.Services
             result.Should().NotBeNull();
             result.AccessToken.Should().NotBeNullOrEmpty();
             result.RefreshToken.Should().NotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public async Task LoginAsync_WithWrongPassword_ReturnsNull()
+        {
+            using var db = GetDbContext();
+            var username = "testUser";
+            var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = "someHash" };
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+
+            var service = new AuthService(db, _options, _mockRequestContext.Object, _mockLogger.Object);
+            var loginDto = new UserDTO { Username = username, Password = "wrongPassword" };
+
+            var result = await service.LoginAsync(loginDto);
+
+            result.Should().BeNull();
         }
     }
 }
