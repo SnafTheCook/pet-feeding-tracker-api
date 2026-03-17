@@ -101,11 +101,12 @@ namespace DidWeFeedTheCatToday.Tests.Services
         {
             var db = GetDbContext();
             var userId = Guid.NewGuid();
+            var rawToken = "testtoken";
             var user = new User
             {
                 Id = userId,
                 RefreshTokenId = Guid.NewGuid(),
-                RefreshTokenHash = "testhash",
+                RefreshTokenHash = Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(rawToken))),
                 RefreshTokenExpiryDate = DateTime.UtcNow.AddHours(1)
             };
 
@@ -117,7 +118,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var request = new RefreshTokenRequestDTO
             {
                 UserId = userId,
-                RefreshToken = "testtoken",
+                RefreshToken = rawToken,
                 RefreshTokenId = Guid.NewGuid(),
             };
 
