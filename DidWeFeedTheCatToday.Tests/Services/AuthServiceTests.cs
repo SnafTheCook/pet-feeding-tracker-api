@@ -7,6 +7,7 @@ using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -93,6 +94,49 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var result = await service.LoginAsync(loginDto);
 
             result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task RefreshTokenAsync_WhenTokenIdMismatches_ReturnsNullAndLogsWarning()
+        {
+            var db = GetDbContext();
+            var userId = Guid.NewGuid();
+            var user = new User
+            {
+                Id = userId,
+                RefreshTokenId = Guid.NewGuid(),
+                RefreshTokenHash = "testhash",
+                RefreshTokenExpiryDate = DateTime.UtcNow.AddHours(1)
+            };
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+
+            var service = new AuthService(db, _options, _mockRequestContext.Object, _mockLogger.Object);
+
+            var request = new RefreshTokenRequestDTO
+            {
+                UserId = userId,
+                RefreshToken = "testtoken",
+                RefreshTokenId = Guid.NewGuid(),
+            };
+
+            var result = await service.RefreshTokenAsync(request);
+
+            result.Should().BeNull();
+
+            _mockLogger.Verify
+                (
+                    v => v.Log
+                    (
+                        LogLevel.Warning,
+                        It.IsAny<EventId>(),
+                        It.Is<It.IsAnyType>((x, t) => x.ToString()!.Contains("Refresh token reuse detected")),
+                        It.IsAny<Exception>(),
+                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                    ),
+                    Times.Once
+                );
         }
     }
 }
