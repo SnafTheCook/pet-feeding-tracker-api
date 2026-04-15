@@ -6,6 +6,7 @@ using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Validation;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -64,6 +65,13 @@ builder.Services.AddSignalR();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingInMemory((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 
