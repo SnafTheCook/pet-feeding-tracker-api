@@ -15,19 +15,15 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
 var appSettings = new AppSettings();
-builder.Configuration.GetSection("AppSettings").Bind(appSettings);
 
+builder.Configuration.GetSection("AppSettings").Bind(appSettings);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(ValidationFilter));
 });
-
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -41,7 +37,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.Token))
     };
 });
-
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("BlazorCorsPolicy", policy =>
@@ -52,7 +47,6 @@ builder.Services.AddCors(policy =>
         .AllowCredentials();
     });
 });
-
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IRequestContext, RequestContext>();
 builder.Services.AddScoped<IAuthServices, AuthService>();
@@ -62,8 +56,7 @@ builder.Services.AddScoped<IPetFeedingQueryService, PetFeedingQueryService>();
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSignalR();
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>();
+builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddMassTransit(x =>
 {
@@ -85,7 +78,6 @@ await DbSeeder.SeedAsync(dbContext);
 app.UseMiddleware<RequestResponseLog>();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapScalarApiReference();
