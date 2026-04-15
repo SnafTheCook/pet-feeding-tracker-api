@@ -4,6 +4,7 @@ using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using FluentAssertions;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         private readonly Mock<IHubContext<PetHub>> _mockHubContext = new();
         private readonly Mock<IHubClients> _mockClients = new();
         private readonly Mock<IClientProxy> _mockClientProxy = new();
+        private readonly Mock<IPublishEndpoint> _mockPublishEndpoint = new();
 
         public FeedingServiceTests()
         {
@@ -36,7 +38,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingsAsync_WhenFeedingsExist_ReturnsAllFeedingsAsDtos()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             var testFeeding1 = new Feeding { PetId = testPet.Id, FeedingTime = DateTime.UtcNow.AddMinutes(-5) };
@@ -57,7 +59,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingByIdAsync_WhenFeedingExists_ReturnsCorrectDto()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Pets.Add(testPet);
@@ -78,7 +80,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetFeedingByIdAsync_WhenFeedingDoesNotExist_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var result = await service.GetFeedingByIdAsync(9999);
 
@@ -89,7 +91,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task AddFeedingAsync_WhenPetExists_SavesFeedingAndReturnsDto()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
 
@@ -119,7 +121,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task AddFeedingAsync_WhenPetDoesNotExist_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var testFeedingDto = new PostFeedingDTO { PetId = 9999 };
 
@@ -132,7 +134,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeleteFeedingAsync_WhenFeedingExists_RemovesFromDatabaseAndReturnsTrue()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Pets.Add(testPet);
@@ -160,7 +162,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeleteFeedingAsync_WhenFeedingDoesNotExist_ReturnsFalse()
         {
             using var context = GetDbContext();
-            var service = new FeedingService(context, _mockHubContext.Object);
+            var service = new FeedingService(context, _mockHubContext.Object, _mockPublishEndpoint.Object);
 
             var result = await service.DeleteFeedingAsync(9999);
             result.Should().BeFalse();
