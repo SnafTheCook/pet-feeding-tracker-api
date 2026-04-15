@@ -5,10 +5,15 @@ using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using Microsoft.AspNetCore.SignalR;
 using DidWeFeedTheCatToday.Hubs;
+using MassTransit;
+using Notification.Domain.Events;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
-    public class FeedingService(AppDbContext context, IHubContext<PetHub> hubContext) : IFeedingService
+    public class FeedingService(
+        AppDbContext context, 
+        IHubContext<PetHub> hubContext,
+        IPublishEndpoint publishEndpoint) : IFeedingService
     {
         /// <summary>
         /// Retrieves a collection of feedings. Query is untracked.
@@ -55,6 +60,14 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             await context.SaveChangesAsync();
 
             await hubContext.Clients.All.SendAsync("PetFed", request.PetId, request.FeedingTime);
+
+            var pet = await context.Pets.FindAsync(feeding.PetId);
+            await publishEndpoint.Publish(new PetFedEvent(
+                Guid.NewGuid(),
+                pet?.Name ?? "Unknown",
+                "owner@example.com",
+                DateTime.UtcNow
+                ));
 
             return FeedingToGetFeedingDTO(request);
         }
