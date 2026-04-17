@@ -6,7 +6,7 @@ namespace DidWeFeedTheCatToday.Services.Interfaces
     {
         Task<IEnumerable<GetFeedingDTO>> GetFeedingsAsync();
         Task<GetFeedingDTO?> GetFeedingByIdAsync(int id);
-        Task<GetFeedingDTO?> AddFeedingAsync(PostFeedingDTO feeding);
+        Task<GetFeedingDTO?> AddFeedingAsync(PostFeedingDTO feeding, CancellationToken ct = default);
         Task<bool> DeleteFeedingAsync(int id);
     }
 }

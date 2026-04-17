@@ -45,7 +45,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
         /// </summary>
         /// <param name="feeding">Feeding data</param>
         /// <returns>a <see cref="GetFeedingDTO"/> on success. Returns <see langword="null"/> if pet not found.</returns>
-        public async Task<GetFeedingDTO?> AddFeedingAsync(PostFeedingDTO feeding)
+        public async Task<GetFeedingDTO?> AddFeedingAsync(PostFeedingDTO feeding, CancellationToken ct = default)
         {
             if (!await context.Pets.AnyAsync(p => p.Id == feeding.PetId))
                 return null;
@@ -67,7 +67,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 pet?.Name ?? "Unknown",
                 "owner@example.com",
                 DateTime.UtcNow
-                ));
+                ), 
+                ct);
 
             return FeedingToGetFeedingDTO(request);
         }

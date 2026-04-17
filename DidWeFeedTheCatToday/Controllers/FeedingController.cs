@@ -41,9 +41,9 @@ namespace DidWeFeedTheCatToday.Controllers
         /// <param name="feeding">Feeding information object.</param>
         /// <returns>API response containing a <see cref="GetFeedingDTO"/>.</returns>
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<GetFeedingDTO>>> PostFeeding(PostFeedingDTO feeding)
+        public async Task<ActionResult<ApiResponse<GetFeedingDTO>>> PostFeeding(PostFeedingDTO feeding, CancellationToken ct = default)
         {
-            var result = await feedingService.AddFeedingAsync(feeding);
+            var result = await feedingService.AddFeedingAsync(feeding, ct);
 
             if (result == null) 
                 return BadRequest(ApiResponse<GetFeedingDTO>.Fail("Invalid pet."));
