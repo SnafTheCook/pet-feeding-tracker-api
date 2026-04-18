@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Notification.Domain.Events;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {
@@ -102,6 +103,12 @@ namespace DidWeFeedTheCatToday.Tests.Services
             _mockClientProxy.Verify(mock => mock.SendCoreAsync(
                 "PetFed", It.Is<object[]>(obj => obj.Length == 2 && (int)obj[0] == testPet.Id),
                 It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _mockPublishEndpoint.Verify(
+                x => x.Publish(
+                    It.Is<PetFedEvent>(e => e.PetName == "Meowstarion"),
+                    It.IsAny<CancellationToken>()),
                 Times.Once);
         }
 
