@@ -1,10 +1,11 @@
-﻿using DidWeFeedTheCatToday.Entities;
+﻿using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using DidWeFeedTheCatToday.Shared.Enums;
+using MassTransit.Futures.Contracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
@@ -39,6 +40,49 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     .FirstOrDefault(), now)
                 })
                 .ToListAsync();
+        }
+
+        public async Task<PagedResult<GetPetDTO>> GetPagedPetAsync(int page, int pageSize, string? searchTerm)
+        {
+            var query = context.Pets.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(p =>  p.Name.ToLower().Contains(searchTerm.ToLower()));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(pet => pet.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(pet => new GetPetDTO {
+                    Id = pet.Id,
+                    Name = pet.Name,
+                    Age = pet.Age,
+                    AdditionalInformation = pet.AdditionalInformation,
+                    CreationDate = pet.CreationDate,
+
+                    LastFed = pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(),
+
+                    Status = CalculateHunger(pet.FeedingTimes
+                    .OrderByDescending(feeding => feeding.FeedingTime)
+                    .Select(feeding => feeding.FeedingTime)
+                    .FirstOrDefault(), DateTime.UtcNow)
+                })
+                .ToListAsync();
+
+            return new PagedResult<GetPetDTO>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                CurrentPage = page,
+                PageSize = pageSize
+            };
         }
 
         /// <summary>
