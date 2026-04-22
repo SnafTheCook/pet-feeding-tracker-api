@@ -6,6 +6,7 @@ namespace DidWeFeedTheCatToday.Services.Interfaces
     public interface IPetService
     {
         Task<IEnumerable<GetPetDTO>> GetAllPetsAsync();
+        Task<PagedResult<GetPetDTO>> GetPagedPetAsync(int page, int pageSize, string? searchTerm);
         Task<GetPetDTO?> GetPetByIdAsync(int id);
         Task<GetPetDTO> AddPetAsync(CommandPetDTO petToAdd);
         Task<ServiceResult> OverridePetAsync(int id, CommandPetDTO petToOverride);
