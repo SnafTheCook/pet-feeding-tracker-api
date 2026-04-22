@@ -8,7 +8,7 @@ namespace DidWeFeedTheCatToday.Client.Services
 {
     public class PetService(HttpClient http)
     {
-        public async Task<List<GetPetDTO>> GetPetsAsync()
+        /*public async Task<List<GetPetDTO>> GetPetsAsync()
         {
 			try
 			{
@@ -20,6 +20,13 @@ namespace DidWeFeedTheCatToday.Client.Services
 				Console.WriteLine($"Error fetching pets: {e.Message}");
 				return new List<GetPetDTO>();
 			}
+        }*/
+
+		public async Task<PagedResult<GetPetDTO>> GetPetsAsync(int page, string? search)
+		{
+            var url = $"api/pets?page={page}&search={search}";
+			var response = await http.GetFromJsonAsync<ApiResponse<PagedResult<GetPetDTO>>>(url);
+			return response?.Data ?? new PagedResult<GetPetDTO>();
         }
 
 		public async Task<List<GetPetFeedingDTO>> GetPetFeedingsAsync()

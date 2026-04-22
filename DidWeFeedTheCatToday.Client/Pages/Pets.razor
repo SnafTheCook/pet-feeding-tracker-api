@@ -42,12 +42,17 @@ else
     private bool showToast = false;
     private string toastMessage = "Unhadled exception.";
     private string toastClass = "bg-success";
+
     private List<GetPetDTO>? pets;
     private HubConnection? hubConnection;
 
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private string searchTerm = "";
+
     protected override async Task OnInitializedAsync()
     {
-        pets = await PetClient.GetPetsAsync();
+        await LoadPets();
 
         hubConnection = new HubConnectionBuilder()
         .WithUrl("http://localhost:8080/pet-hub")
@@ -69,6 +74,17 @@ else
         });
 
         await hubConnection.StartAsync();
+    }
+
+    private async Task LoadPets()
+    {
+        var result = await PetClient.GetPetsAsync(currentPage, searchTerm);
+        pets = result.Items.ToList();
+
+        currentPage = result.CurrentPage;
+        totalPages = result.TotalPages;
+
+        StateHasChanged();
     }
 
     private async Task HandleDelete(int id)
