@@ -42,7 +42,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<PagedResult<GetPetDTO>> GetPagedPetAsync(int page, int pageSize, string? searchTerm)
+        public async Task<PagedResult<GetPetDTO>> GetPagedPetsAsync(int page, int pageSize, string? searchTerm)
         {
             var query = context.Pets.AsNoTracking();
 
