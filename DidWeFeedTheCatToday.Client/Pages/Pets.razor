@@ -12,6 +12,15 @@
 
 <h1>Pets</h1>
 
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by name..." @bind="searchTerm" @bind:event="oninput" @onkeyup="LoadPets" />
+            <button class="btn btn-outline-secondary" @onclick="LoadPets">Search</button>
+        </div>
+    </div>
+</div>
+
 @if (pets == null)
 {
     <div class="spinner-border" role="status">
@@ -85,6 +94,12 @@ else
         totalPages = result.TotalPages;
 
         StateHasChanged();
+    }
+
+    private async Task HandleSearch()
+    {
+        currentPage = 1;
+        await LoadPets();
     }
 
     private async Task HandleDelete(int id)
