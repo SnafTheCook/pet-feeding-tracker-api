@@ -16,7 +16,7 @@
     <div class="col-md-6">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="Search by name..." @bind="searchTerm" @bind:event="oninput" @onkeyup="LoadPets" />
-            <button class="btn btn-outline-secondary" @onclick="LoadPets">Search</button>
+            <button class="btn btn-outline-secondary" @onclick="HandleSearch">Search</button>
         </div>
     </div>
 </div>
@@ -44,6 +44,12 @@ else
                 />
             </div>
         }
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button class="btn btn-primary" @onclick="PrevPage" disabled="@(currentPage <= 1)">Previous</button>
+        <span>Page @currentPage of @totalPages</span>
+        <button class="btn btn-primary" @onclick="NextPage" disabled="@(currentPage >= totalPages)">Next</button>
     </div>
 }
 
@@ -100,6 +106,24 @@ else
     {
         currentPage = 1;
         await LoadPets();
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadPets();
+        }
+    }
+
+    private async Task PrevPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadPets();
+        }
     }
 
     private async Task HandleDelete(int id)
