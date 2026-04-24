@@ -12,6 +12,15 @@
 
 <h1>Pets</h1>
 
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search by name..." @bind="searchTerm" @bind:event="oninput" @onkeyup="LoadPets" />
+            <button class="btn btn-outline-secondary" @onclick="HandleSearch">Search</button>
+        </div>
+    </div>
+</div>
+
 @if (pets == null)
 {
     <div class="spinner-border" role="status">
@@ -36,18 +45,29 @@ else
             </div>
         }
     </div>
+
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button class="btn btn-primary" @onclick="PrevPage" disabled="@(currentPage <= 1)">Previous</button>
+        <span>Page @currentPage of @totalPages</span>
+        <button class="btn btn-primary" @onclick="NextPage" disabled="@(currentPage >= totalPages)">Next</button>
+    </div>
 }
 
 @code {
     private bool showToast = false;
     private string toastMessage = "Unhadled exception.";
     private string toastClass = "bg-success";
+
     private List<GetPetDTO>? pets;
     private HubConnection? hubConnection;
 
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private string searchTerm = "";
+
     protected override async Task OnInitializedAsync()
     {
-        pets = await PetClient.GetPetsAsync();
+        await LoadPets();
 
         hubConnection = new HubConnectionBuilder()
         .WithUrl("http://localhost:8080/pet-hub")
@@ -69,6 +89,41 @@ else
         });
 
         await hubConnection.StartAsync();
+    }
+
+    private async Task LoadPets()
+    {
+        var result = await PetClient.GetPetsAsync(currentPage, searchTerm);
+        pets = result.Items.ToList();
+
+        currentPage = result.CurrentPage;
+        totalPages = result.TotalPages;
+
+        StateHasChanged();
+    }
+
+    private async Task HandleSearch()
+    {
+        currentPage = 1;
+        await LoadPets();
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadPets();
+        }
+    }
+
+    private async Task PrevPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadPets();
+        }
     }
 
     private async Task HandleDelete(int id)

@@ -20,6 +20,16 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return Ok(ApiResponse<IEnumerable<GetPetDTO>>.Ok(result));
         }
+
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<PagedResult<GetPetDTO>>>> GetPetsPaginated(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 6,
+            [FromQuery] string? search = null)
+        {
+            var result = await petService.GetPagedPetsAsync(page, pageSize, search);
+            return Ok(ApiResponse<PagedResult<GetPetDTO>>.Ok(result));
+        }
         /// <summary>
         /// Retreives a unique pet.
         /// </summary>
