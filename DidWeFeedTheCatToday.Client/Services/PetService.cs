@@ -22,9 +22,9 @@ namespace DidWeFeedTheCatToday.Client.Services
 			}
         }*/
 
-		public async Task<PagedResult<GetPetDTO>> GetPetsAsync(int page, string? search)
+		public async Task<PagedResult<GetPetDTO>> GetPetsAsync(int page, string? search, string? sortBy)
 		{
-            var url = $"api/pets?page={page}&search={search}";
+            var url = $"api/pets?page={page}&search={search}&sortBy={sortBy}";
 			var response = await http.GetFromJsonAsync<ApiResponse<PagedResult<GetPetDTO>>>(url);
 			return response?.Data ?? new PagedResult<GetPetDTO>();
         }
