@@ -25,9 +25,10 @@ namespace DidWeFeedTheCatToday.Controllers
         public async Task<ActionResult<ApiResponse<PagedResult<GetPetDTO>>>> GetPetsPaginated(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 6,
-            [FromQuery] string? search = null)
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = "name")
         {
-            var result = await petService.GetPagedPetsAsync(page, pageSize, search);
+            var result = await petService.GetPagedPetsAsync(page, pageSize, search, sortBy);
             return Ok(ApiResponse<PagedResult<GetPetDTO>>.Ok(result));
         }
         /// <summary>
