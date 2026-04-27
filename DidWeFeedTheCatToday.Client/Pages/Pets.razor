@@ -17,6 +17,11 @@
         <div class="input-group">
             <input type="text" class="form-control" placeholder="Search by name..." @bind="searchTerm" @bind:event="oninput" @onkeyup="LoadPets" />
             <button class="btn btn-outline-secondary" @onclick="HandleSearch">Search</button>
+            <select class="form-select" @bind="sortBy" @bind:after="LoadPets">
+                <option value="name">Name</option>
+                <option value="age">Age</option>
+                <option value="lastFed">Last Fed</option>
+            </select>
         </div>
     </div>
 </div>
