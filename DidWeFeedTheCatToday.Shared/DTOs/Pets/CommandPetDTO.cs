@@ -11,5 +11,6 @@ namespace DidWeFeedTheCatToday.Shared.DTOs.Pets
         public int? Age { get; set; }
         [StringLength(500, ErrorMessage = "Additional information is too long.")]
         public string? AdditionalInformation { get; set; }
+        public byte[]? RowVersion { get; set; }
     }
 }
