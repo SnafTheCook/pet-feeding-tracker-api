@@ -1,0 +1,82 @@
+﻿@page "/edit-pet/{Id:int}"
+@using DidWeFeedTheCatToday.Shared.DTOs.Pets
+@using DidWeFeedTheCatToday.Client.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject PetService PetClient
+@inject NavigationManager NavManager
+
+<h3>Edit Pet</h3>
+
+@if (editModel == null)
+{
+    <p><em>Loading pet data...</em></p>
+}
+else
+{
+    <div class="card p-4 shadow-sm" style="max-width: 500px;">
+        <EditForm Model="@editModel" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <InputText @bind-Value="editModel.Name" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Age</label>
+                <InputNumber @bind-Value="editModel.Age" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Additional Info</label>
+                <InputTextArea @bind-Value="editModel.AdditionalInformation" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private CommandPetDTO? editModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await PetClient.GetPetByIdAsync(Id);
+
+        if (result != null)
+        {
+            editModel = new CommandPetDTO
+            {
+                Name = result.Name,
+                Age = result.Age,
+                AdditionalInformation = result.AdditionalInformation,
+                RowVersion = result.RowVersion
+            };
+        }
+        else
+        {
+            NavManager.NavigateTo("/pets");
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var success = await PetClient.UpdatePetAsync(Id, editModel!);
+        
+        if (success)
+        {
+            NavManager.NavigateTo("/pets");
+        }
+        else
+        {
+            //TODO
+        }
+    }
+
+    private void Cancel() => NavManager.NavigateTo("/pets");
+}
