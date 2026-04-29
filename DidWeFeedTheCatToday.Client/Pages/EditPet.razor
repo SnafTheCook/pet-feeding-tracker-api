@@ -44,6 +44,10 @@ else
     [Parameter] public int Id { get; set; }
     private CommandPetDTO? editModel;
 
+    private bool showToast = false;
+    private string toastMessage = "Unhadled exception.";
+    private string toastClass = "bg-success";
+
     protected override async Task OnInitializedAsync()
     {
         var result = await PetClient.GetPetByIdAsync(Id);
@@ -67,16 +71,43 @@ else
     private async Task HandleSubmit()
     {
         var success = await PetClient.UpdatePetAsync(Id, editModel!);
-        
+
         if (success)
         {
             NavManager.NavigateTo("/pets");
         }
         else
         {
-            //TODO
+            toastMessage = "This pet was modified by another user. Please refresh and try again.";
+            await ShowToast(toastMessage, isError: true);
         }
     }
 
     private void Cancel() => NavManager.NavigateTo("/pets");
+
+    private async Task ShowToast(string message = "Something went wrong. Try again later.", bool isError = false)
+    {
+        toastMessage = message;
+        toastClass = isError ? "bg-danger" : "bg-success";
+        showToast = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        showToast = false;
+        StateHasChanged();
+    }
+}
+
+@if (showToast)
+{
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div class="toast show align-items-center text-white @toastClass border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @toastMessage
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => showToast = false"></button>
+            </div>
+        </div>
+    </div>
 }
