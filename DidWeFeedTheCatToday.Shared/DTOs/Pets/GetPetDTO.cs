@@ -11,5 +11,6 @@ namespace DidWeFeedTheCatToday.Shared.DTOs.Pets
         public string? AdditionalInformation { get; set; }
         public DateTime? LastFed {  get; set; }
         public HungerStatus Status { get; set; }
+        public byte[]? RowVersion { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     Age = pet.Age,
                     AdditionalInformation = pet.AdditionalInformation,
                     CreationDate = pet.CreationDate,
+                    RowVersion = pet.RowVersion,
 
                     LastFed = pet.FeedingTimes
                     .OrderByDescending(feeding => feeding.FeedingTime)
@@ -70,6 +71,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     Age = pet.Age,
                     AdditionalInformation = pet.AdditionalInformation,
                     CreationDate = pet.CreationDate,
+                    RowVersion = pet.RowVersion,
 
                     LastFed = pet.FeedingTimes
                     .OrderByDescending(feeding => feeding.FeedingTime)
@@ -110,6 +112,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     Age = pet.Age,
                     AdditionalInformation = pet.AdditionalInformation,
                     CreationDate = pet.CreationDate,
+                    RowVersion = pet.RowVersion,
 
                     LastFed = pet.FeedingTimes
                     .OrderByDescending(feeding => feeding.FeedingTime)
@@ -169,6 +172,11 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             petRequested.Name = petToOverride.Name;
             petRequested.Age = petToOverride.Age;
             petRequested.AdditionalInformation = petToOverride.AdditionalInformation;
+
+            if (petToOverride.RowVersion != null)
+            {
+                context.Entry(petRequested).Property(p => p.RowVersion).OriginalValue = petToOverride.RowVersion;
+            }
 
             try
             {

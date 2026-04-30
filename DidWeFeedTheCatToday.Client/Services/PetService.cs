@@ -29,6 +29,29 @@ namespace DidWeFeedTheCatToday.Client.Services
 			return response?.Data ?? new PagedResult<GetPetDTO>();
         }
 
+		public async Task<GetPetDTO?> GetPetByIdAsync(int id)
+		{
+			try
+			{
+				var url = $"api/pets/{id}";
+				var response = await http.GetAsync(url);
+
+				if (response.IsSuccessStatusCode)
+				{
+					var result = await response.Content.ReadFromJsonAsync<ApiResponse<GetPetDTO>>();
+					return result?.Data;
+				}
+
+				return null;
+			}
+			catch (Exception ex)
+			{
+                Console.WriteLine($"Error loading pet: {ex.Message}");
+                return null;
+            }
+
+		}
+
 		public async Task<List<GetPetFeedingDTO>> GetPetFeedingsAsync()
 		{
 			try
@@ -58,6 +81,12 @@ namespace DidWeFeedTheCatToday.Client.Services
 		public async Task<bool> AddFeedingAsync(PostFeedingDTO feeding)
 		{
 			var response = await http.PostAsJsonAsync("api/feedings", feeding);
+			return response.IsSuccessStatusCode;
+		}
+
+		public async Task<bool> UpdatePetAsync(int id, CommandPetDTO petToUpdate)
+		{
+			var response = await http.PutAsJsonAsync($"api/pets/{id}", petToUpdate);
 			return response.IsSuccessStatusCode;
 		}
     }
