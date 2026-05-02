@@ -1,0 +1,36 @@
+﻿@using DidWeFeedTheCatToday.Client.Services
+@inject ToastService ToastService
+@implements IDisposable
+
+
+@if (ToastService.IsVisible)
+{
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+        <div class="toast show align-items-center text-white @ToastService.CssClass border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    @ToastService.Message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        @onclick="Hide"></button>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += StateHasChanged;
+        ToastService.OnHide += StateHasChanged;
+    }
+
+    private void Hide() => StateHasChanged();
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= StateHasChanged;
+        ToastService.OnHide -= StateHasChanged;
+    }
+}

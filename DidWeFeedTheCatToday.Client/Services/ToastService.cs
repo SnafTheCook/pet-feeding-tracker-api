@@ -4,7 +4,7 @@
     {
         public string Message { get; private set; } = string.Empty;
         public string CssClass { get; private set; } = "bg-success";
-        public bool IsInvisible { get; private set; }
+        public bool IsVisible { get; private set; }
 
         public event Action? OnShow;
         public event Action? OnHide;
@@ -16,7 +16,7 @@
         {
             Message = message;
             CssClass = cssClass;
-            IsInvisible = true;
+            IsVisible = true;
             OnShow?.Invoke();
 
             Task.Delay(3000).ContinueWith(_ => HideToast());
@@ -24,7 +24,7 @@
 
         private void HideToast()
         {
-            IsInvisible = false;
+            IsVisible = false;
             OnHide?.Invoke();
         }
     }
