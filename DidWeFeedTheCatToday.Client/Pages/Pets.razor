@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @implements IAsyncDisposable
 @inject PetService PetClient
+@inject ToastService Toast;
 
 <PageTitle>Our Pets</PageTitle>
 
@@ -59,10 +60,6 @@ else
 }
 
 @code {
-    private bool showToast = false;
-    private string toastMessage = "Unhadled exception.";
-    private string toastClass = "bg-success";
-
     private List<GetPetDTO>? pets;
     private HubConnection? hubConnection;
 
@@ -138,10 +135,10 @@ else
         if (success)
         {
             pets?.RemoveAll(pet => pet.Id == id);
-            await ShowToast("Pet deleted successfully!");
+            Toast.ShowSuccess("Pet deleted successfully!");
         }
         else
-            await ShowToast(isError: true);
+            Toast.ShowError("Something went wrong. Try again later.");
     }
 
     private async Task HandleFeed(int petId)
@@ -151,21 +148,9 @@ else
         var success = await PetClient.AddFeedingAsync(feeding);
 
         if (success)
-            await ShowToast("Pet fed successfully!");
+            Toast.ShowSuccess("Pet fed successfully!");
         else
-            await ShowToast(isError: true);
-    }
-
-    private async Task ShowToast(string message = "Something went wrong. Try again later.", bool isError = false)
-    {
-        toastMessage = message;
-        toastClass = isError ? "bg-danger" : "bg-success";
-        showToast = true;
-        StateHasChanged();
-
-        await Task.Delay(3000);
-        showToast = false;
-        StateHasChanged();
+            Toast.ShowError("Something went wrong. Try again later.");
     }
 
     public async ValueTask DisposeAsync()
@@ -173,18 +158,4 @@ else
         if (hubConnection != null)
             await hubConnection.DisposeAsync();
     }
-}
-
-@if (showToast)
-{
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div class="toast show align-items-center text-white @toastClass border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body">
-                    @toastMessage
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => showToast = false"></button>
-            </div>
-        </div>
-    </div>
 }
