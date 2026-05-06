@@ -19,3 +19,8 @@ services:
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1433:1433"
+  rabbitmq:
+      image: rabbitmq:3-management
+      ports:
+        - "5672:5672"
+        - "15672:15672"
