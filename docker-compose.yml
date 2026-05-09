@@ -9,9 +9,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - AppSettings__Token=${JWT_TOKEN}
+      - AppSettings__RabbitMqHost=rabbitmq
       - ConnectionStrings__DefaultConnection=Server=db;Database=PetsDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true
     depends_on:
       - db
+      - rabbitMq  
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -21,6 +23,26 @@ services:
       - "1433:1433"
   rabbitmq:
       image: rabbitmq:3-management
+      container_name: cat-bus
       ports:
         - "5672:5672"
         - "15672:15672"
+      networks:
+        - cat-network
+  notification-api:
+    profiles: ["full-stack"]
+    image: notification-service:latest
+    build:
+      context: ../notification-service 
+      dockerfile: Notification.Api/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AppSettings__RabbitMqHost=rabbitmq
+      - ConnectionStrings__DefaultConnection=Data Source=notifications.db
+    networks:
+      - cat-network
+    depends_on:
+      - rabbitmq
+networks:
+  cat-network:
+    driver: bridge
