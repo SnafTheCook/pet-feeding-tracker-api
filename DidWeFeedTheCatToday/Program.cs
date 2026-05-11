@@ -72,9 +72,12 @@ var app = builder.Build();
 using var scope = app.Services.CreateScope(); //making sure Dispose() is called
 
 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-dbContext.Database.Migrate();
 
-await DbSeeder.SeedAsync(dbContext);
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    dbContext.Database.Migrate();
+    await DbSeeder.SeedAsync(dbContext);
+}
 
 app.UseMiddleware<RequestResponseLog>();
 app.UseMiddleware<ErrorHandlerMiddleware>();

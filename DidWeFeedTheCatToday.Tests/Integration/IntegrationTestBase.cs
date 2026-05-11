@@ -8,6 +8,7 @@ using DidWeFeedTheCatToday;
 using Microsoft.EntityFrameworkCore;
 using DidWeFeedTheCatToday.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DidWeFeedTheCatToday.Tests.Integration
 {
@@ -19,6 +20,8 @@ namespace DidWeFeedTheCatToday.Tests.Integration
         {
             var testFactory = webApplicationFactory.WithWebHostBuilder(builder =>
             {
+                builder.UseEnvironment("Testing");
+
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
