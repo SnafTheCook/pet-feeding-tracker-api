@@ -9,15 +9,21 @@ using Microsoft.EntityFrameworkCore;
 using DidWeFeedTheCatToday.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using System.Data.Common;
+using Microsoft.Data.Sqlite;
 
 namespace DidWeFeedTheCatToday.Tests.Integration
 {
     public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
     {
         protected readonly HttpClient _httpClient;
+        private readonly DbConnection _connection;
 
         public IntegrationTestBase(WebApplicationFactory<Program> webApplicationFactory)
         {
+            _connection = new SqliteConnection("Data Source=:memory:");
+            _connection.Open();
+
             var testFactory = webApplicationFactory.WithWebHostBuilder(builder =>
             {
                 builder.UseEnvironment("Testing");
@@ -29,14 +35,12 @@ namespace DidWeFeedTheCatToday.Tests.Integration
 
                     services.AddDbContext<AppDbContext>(options =>
                     {
-                        options.UseSqlite("Data Source=:memory:");
+                        options.UseSqlite(_connection);
                     });
 
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-                    db.Database.OpenConnection();
                     db.Database.EnsureCreated();
                 });
             });

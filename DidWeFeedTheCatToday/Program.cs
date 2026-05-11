@@ -69,16 +69,6 @@ builder.Services.AddMassTransit(x =>
 
 var app = builder.Build();
 
-using var scope = app.Services.CreateScope(); //making sure Dispose() is called
-
-var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-if (!app.Environment.IsEnvironment("Testing"))
-{
-    dbContext.Database.Migrate();
-    await DbSeeder.SeedAsync(dbContext);
-}
-
 app.UseMiddleware<RequestResponseLog>();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
@@ -98,6 +88,17 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<PetHub>("/pet-hub");
 app.MapHealthChecks("/health");
+
+var isTesting = app.Environment.IsEnvironment("Testing") ||
+                AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName!.Contains("Microsoft.AspNetCore.Mvc.Testing"));
+
+if (!isTesting)
+{
+    using var scope = app.Services.CreateScope(); //making sure Dispose() is called
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+    await DbSeeder.SeedAsync(dbContext);
+}
 
 app.Run();
 
