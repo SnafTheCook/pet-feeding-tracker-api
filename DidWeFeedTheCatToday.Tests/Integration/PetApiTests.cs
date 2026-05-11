@@ -21,5 +21,15 @@ namespace DidWeFeedTheCatToday.Tests.Integration
 
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
         }
+
+        [Fact]
+        public async Task PostPet_WithInvalidData_ReturnsBadRequest()
+        {
+            var request = new { Name = "Meow", Age = 2 };
+
+            var response = await _httpClient.PostAsJsonAsync("api/pets", request);
+
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
+        }
     }
 }
