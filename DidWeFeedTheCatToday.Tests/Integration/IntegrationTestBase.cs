@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
+using MassTransit;
 
 namespace DidWeFeedTheCatToday.Tests.Integration
 {
@@ -28,6 +30,17 @@ namespace DidWeFeedTheCatToday.Tests.Integration
             {
                 builder.UseEnvironment("Testing");
 
+                builder.ConfigureAppConfiguration((context, config) =>
+                {
+                    config.AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["AppSettings:Token"] = "Place128CharLongTokenHereButThisWillAlsoWork111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+                        ["AppSettings:Issuer"] = "TestIssuer",
+                        ["AppSettings:Audience"] = "TestAudience",
+                        ["AppSettings:AllowedOrigins:0"] = "http://localhost"
+                    });
+                });
+
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
@@ -38,6 +51,14 @@ namespace DidWeFeedTheCatToday.Tests.Integration
                         options.UseSqlite(_connection);
                     });
 
+                    var massTransitDescriptors = services.Where(d => d.ServiceType.Namespace?.Contains("MassTransit") ?? false).ToList();
+                    foreach (var d in massTransitDescriptors) services.Remove(d);
+
+                    services.AddMassTransit(x =>
+                    {
+                        x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                    });
+
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -46,6 +67,11 @@ namespace DidWeFeedTheCatToday.Tests.Integration
             });
 
             _httpClient = webApplicationFactory.CreateClient();
+        }
+        public void Dispose()
+        {
+            _connection.Close();
+            _connection.Dispose();
         }
     }
 }
