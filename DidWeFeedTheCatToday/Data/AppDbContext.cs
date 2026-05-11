@@ -19,11 +19,25 @@ namespace DidWeFeedTheCatToday.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Pet>()
-                .HasMany(p => p.FeedingTimes)
+            modelBuilder.Entity<Pet>(builder =>
+            {
+                builder.HasMany(p => p.FeedingTimes)
                 .WithOne()
                 .HasForeignKey(f => f.PetId)
                 .OnDelete(deleteBehavior: DeleteBehavior.Cascade);
+
+                if (Database.IsSqlite())
+                {
+                    builder.Property(p => p.RowVersion)
+                           .IsRequired(false)
+                           .ValueGeneratedOnAddOrUpdate();
+                }
+                else
+                {
+                    builder.Property(p => p.RowVersion).IsRowVersion();
+                }
+            });
+                
 
             modelBuilder.Entity<Pet>()
                 .Property(p => p.RowVersion)
