@@ -30,27 +30,9 @@ namespace DidWeFeedTheCatToday.Tests.Integration
             {
                 builder.UseEnvironment("Testing");
 
-                builder.UseSetting("AppSettings:Token", "Place128CharLongTokenHereButThisWillAlsoWork111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
-                builder.UseSetting("AppSettings:Issuer", "Test");
-                builder.UseSetting("AppSettings:Audience", "Test");
-                builder.UseSetting("AppSettings:AllowedOrigins:0", "http://localhost");
-
                 builder.ConfigureServices(services =>
                 {
-                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                    if (descriptor != null) services.Remove(descriptor);
                     services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
-
-                    var massTransitServices = services.Where(d =>
-                        d.ServiceType.FullName?.Contains("MassTransit") == true ||
-                        d.ImplementationType?.FullName?.Contains("MassTransit") == true).ToList();
-
-                    foreach (var service in massTransitServices) services.Remove(service);
-
-                    services.AddMassTransit(x =>
-                    {
-                        x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                    });
 
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();

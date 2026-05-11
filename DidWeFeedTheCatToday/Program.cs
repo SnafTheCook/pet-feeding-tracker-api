@@ -15,6 +15,8 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+var isTesting = builder.Environment.IsEnvironment("Testing") ||
+                AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName!.Contains("Microsoft.AspNetCore.Mvc.Testing"));
 var appSettings = new AppSettings();
 
 builder.Configuration.GetSection("AppSettings").Bind(appSettings);
@@ -23,7 +25,19 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(typeof(ValidationFilter));
 });
 builder.Services.AddOpenApi();
-builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (isTesting)
+{
+    //
+}
+else
+{
+    builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+
+var jwtKey = string.IsNullOrEmpty(appSettings.Token)
+    ? "Place128CharLongTokenHereButThisWillAlsoWork111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+    : appSettings.Token;
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -34,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidAudience = appSettings.Audience,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.Token))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 builder.Services.AddCors(policy =>
@@ -60,11 +74,18 @@ builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddMassTransit(x =>
 {
-    x.UsingRabbitMq((context, cfg) =>
+    if (isTesting)
     {
-        cfg.Host(appSettings.RabbitMqHost);
-        cfg.ConfigureEndpoints(context);
-    });
+        x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+    }
+    else
+    {
+        x.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host(appSettings.RabbitMqHost);
+            cfg.ConfigureEndpoints(context);
+        });
+    }
 });
 
 var app = builder.Build();
@@ -89,12 +110,9 @@ app.MapControllers();
 app.MapHub<PetHub>("/pet-hub");
 app.MapHealthChecks("/health");
 
-var isTesting = app.Environment.IsEnvironment("Testing") ||
-                AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName!.Contains("Microsoft.AspNetCore.Mvc.Testing"));
-
 if (!isTesting)
 {
-    using var scope = app.Services.CreateScope(); //making sure Dispose() is called
+    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
     await DbSeeder.SeedAsync(dbContext);
