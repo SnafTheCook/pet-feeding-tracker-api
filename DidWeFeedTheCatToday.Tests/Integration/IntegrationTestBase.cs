@@ -16,7 +16,7 @@ using MassTransit;
 
 namespace DidWeFeedTheCatToday.Tests.Integration
 {
-    public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>
+    public class IntegrationTestBase : IClassFixture<WebApplicationFactory<Program>>, IDisposable
     {
         protected readonly HttpClient _httpClient;
         private readonly DbConnection _connection;
@@ -30,29 +30,22 @@ namespace DidWeFeedTheCatToday.Tests.Integration
             {
                 builder.UseEnvironment("Testing");
 
-                builder.ConfigureAppConfiguration((context, config) =>
-                {
-                    config.AddInMemoryCollection(new Dictionary<string, string?>
-                    {
-                        ["AppSettings:Token"] = "Place128CharLongTokenHereButThisWillAlsoWork111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                        ["AppSettings:Issuer"] = "TestIssuer",
-                        ["AppSettings:Audience"] = "TestAudience",
-                        ["AppSettings:AllowedOrigins:0"] = "http://localhost"
-                    });
-                });
+                builder.UseSetting("AppSettings:Token", "Place128CharLongTokenHereButThisWillAlsoWork111111111111111111111111111111111111111111111111111111111111111111111111111111111111");
+                builder.UseSetting("AppSettings:Issuer", "Test");
+                builder.UseSetting("AppSettings:Audience", "Test");
+                builder.UseSetting("AppSettings:AllowedOrigins:0", "http://localhost");
 
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
                     if (descriptor != null) services.Remove(descriptor);
+                    services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
 
-                    services.AddDbContext<AppDbContext>(options =>
-                    {
-                        options.UseSqlite(_connection);
-                    });
+                    var massTransitServices = services.Where(d =>
+                        d.ServiceType.FullName?.Contains("MassTransit") == true ||
+                        d.ImplementationType?.FullName?.Contains("MassTransit") == true).ToList();
 
-                    var massTransitDescriptors = services.Where(d => d.ServiceType.Namespace?.Contains("MassTransit") ?? false).ToList();
-                    foreach (var d in massTransitDescriptors) services.Remove(d);
+                    foreach (var service in massTransitServices) services.Remove(service);
 
                     services.AddMassTransit(x =>
                     {
@@ -66,8 +59,9 @@ namespace DidWeFeedTheCatToday.Tests.Integration
                 });
             });
 
-            _httpClient = webApplicationFactory.CreateClient();
+            _httpClient = testFactory.CreateClient();
         }
+
         public void Dispose()
         {
             _connection.Close();
