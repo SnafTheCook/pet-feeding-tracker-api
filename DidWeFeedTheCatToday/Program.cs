@@ -24,10 +24,6 @@ builder.Configuration.GetSection("AppSettings").Bind(appSettings);
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(ValidationFilter));
-})
-.AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddOpenApi();
 if (isTesting)
