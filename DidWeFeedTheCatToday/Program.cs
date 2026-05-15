@@ -108,7 +108,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<PetHub>("/pet-hub");
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health").RequireCors("BlazorCorsPolicy");
 
 if (!isTesting)
 {
