@@ -54,15 +54,15 @@ namespace DidWeFeedTheCatToday.Services.Implementations
 
             var totalCount = await query.CountAsync();
 
-            query = sortBy switch
+            query = sortBy?.ToLower() switch
             {
                 "age" => query.OrderBy(p => p.Age),
-                "lastFed" => query.OrderByDescending(p => p.FeedingTimes.OrderByDescending(f => f.FeedingTime).Select(f => f.FeedingTime)),
+                "lastfed" => query.OrderByDescending(p =>
+                    p.FeedingTimes.Max(f => (DateTime?)f.FeedingTime)),
                 _ => query.OrderBy(p => p.Name)
             };
 
             var items = await query
-                .OrderBy(pet => pet.Name)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(pet => new GetPetDTO {

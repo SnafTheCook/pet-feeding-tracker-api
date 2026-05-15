@@ -13,13 +13,13 @@ namespace DidWeFeedTheCatToday.Controllers
         /// Retrieves all pets from the database.
         /// </summary>
         /// <returns>API response containing a collection of <see cref="GetPetDTO"/>.</returns>
-        [HttpGet]
+        /*[HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<GetPetDTO>>>> GetPets()
         {
             var result = await petService.GetAllPetsAsync();
 
             return Ok(ApiResponse<IEnumerable<GetPetDTO>>.Ok(result));
-        }
+        }*/
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PagedResult<GetPetDTO>>>> GetPetsPaginated(

@@ -10,10 +10,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - AppSettings__Token=${JWT_TOKEN}
       - AppSettings__RabbitMqHost=rabbitmq
+      - AppSettings__AllowedOrigins__0=http://localhost:5001
       - ConnectionStrings__DefaultConnection=Server=db;Database=PetsDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true
     depends_on:
       - db
-      - rabbitMq  
+      - rabbitmq  
+    networks:
+      - cat-network
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -21,6 +24,8 @@ services:
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1433:1433"
+    networks:
+      - cat-network
   rabbitmq:
       image: rabbitmq:3-management
       container_name: cat-bus
@@ -43,6 +48,17 @@ services:
       - cat-network
     depends_on:
       - rabbitmq
+  pet-feeding-ui:
+    image: didwefeedthecattoday-ui:latest
+    build:
+      context: .
+      dockerfile: DidWeFeedTheCatToday.Client/Dockerfile
+    ports:
+      - "5001:80" #http://localhost:5001
+    depends_on:
+      - pet-feeding-api
+    networks:
+      - cat-network
 networks:
   cat-network:
     driver: bridge
