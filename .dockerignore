@@ -5,3 +5,6 @@ DidWeFeedTheCatToday.Tests/
 bin/
 obj/
 .env
+DidWeFeedTheCatToday.Mobile/build/
+DidWeFeedTheCatToday.Mobile/.dart_tool/
+DidWeFeedTheCatToday.Mobile/.pub-cache/
