@@ -5,7 +5,7 @@
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
 ![Authentication](https://img.shields.io/badge/Auth-JWT%20%2B%20Refresh%20Tokens-green)
 
-A .NET 9 Web API built to manage and track pet feeding schedules. This project serves as a demonstration of backend architecture standards, including secure authentication, database concurrency management, and containerized deployment.
+A unified cross-platform application designed to track pet feeding schedules in real-time. This project serves as a demonstration of backend architecture standards, including secure authentication, database concurrency management, and containerized deployment with multiple frontend clients (Blazor WebAssembly and Flutter).
 
 ## Technical Stack
 
@@ -44,34 +44,46 @@ The project includes a comprehensive test suite.
 * **Global Error Handling:** Custom middleware captures unhandled exceptions to return standardized JSON responses and log server-side issues.
 * **Validation Filter:** An `IAsyncActionFilter` intercepts incoming requests to execute FluentValidation rules. This ensures that the service layer only receives valid data, returning a 400 Bad Request automatically when rules are violated.
 
-## Local Setup and Deployment
+## DevOps and Deployment
 
-The project is ready for containerized deployment using Docker Compose.
+The entire ecosystem is orchestrated using **Docker Compose** to provide a consistent development and production environment.
 
-### Running with Docker
+* **Containerization:** Separate Dockerfiles for the API, Blazor (Nginx), and Flutter Web (Nginx).
+* **Networking:** Services communicate over an internal Docker bridge network, with frontends served via Nginx reverse proxies.
+* **CI/CD:** Integrated GitHub Actions to automate build verification and unit testing (xUnit/Moq) on every pull request.
 
-1. **Environment Configuration:**
-   * Copy `.env.example` to a new file named `.env`.
-   * Provide values for `DB_PASSWORD` and `JWT_TOKEN`.
+## Project Structure
 
-2. **Launch:**  
-  
-    ```docker-compose up --build```
+```text
+/
+├── DidWeFeedTheCatToday.sln        # Root Solution
+├── DidWeFeedTheCatToday/           # ASP.NET Core Web API
+├── DidWeFeedTheCatToday.Client/    # Blazor WebAssembly Frontend
+├── DidWeFeedTheCatToday.Mobile/    # Flutter Mobile/Web Frontend
+├── DidWeFeedTheCatToday.Shared/    # Shared C# DTOs and Enums
+└── DidWeFeedTheCatToday.Tests/     # xUnit Test Suite
+```
 
-4. **Endpoints:**
-   * Scalar Documentation: http://localhost:8080/scalar
-   * OpenAPI Specification: http://localhost:8080/openapi/v1.json
+## How to Run
 
-## Project Roadmap
-  * **Clean Architecture:** Transitioning to a hexagonal/onion architecture to further decouple the core domain.
-  * **Frontend Integration:** Building a Blazor WebAssembly dashboard to interact with the API.
-  * **Cloud Deployment:** Configuring automated deployment to Azure App Service and Azure SQL.
+### Requirements
+* Docker Desktop
+* .NET 9 SDK (for local development)
 
-## Developer Note
+### Setup
+1. Clone the repository.
+2. Create a `.env` file in the root directory based on the `.env.example` provided.
+3. Launch the ecosystem:
+   ```bash
+   docker-compose up --build
+   ```
 
-This project was developed as part of a career transition from Unity Game Development (C#) to Enterprise .NET Development.
+### Access Points
+* **Blazor Web App:** http://localhost:5001
+* **Flutter Web Demo:** http://localhost:5002
+* **API Documentation (Scalar):** http://localhost:8080/scalar/v1
 
-
-
-
-
+### Demo Credentials
+The database is automatically seeded with a default administrative account for testing:
+* **Username:** `admin`
+* **Password:** `Admin123!`
