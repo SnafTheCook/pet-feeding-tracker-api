@@ -5,11 +5,17 @@ using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DidWeFeedTheCatToday.Tests.Services
 {
-    public class PetServiceTests
+    public class PetServiceTests : IDisposable
     {
+        private readonly IMemoryCache _cache;
+        public PetServiceTests()
+        {
+            _cache = new MemoryCache(new MemoryCacheOptions());
+        }
         private AppDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -23,7 +29,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetPetByIdAsync_WhenPetExists_ReturnsPetDto()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Add(testPet);
@@ -40,7 +46,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetPetByIdAsync_WhenPetDoesNotExist_ReturnsNull()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var result = await service.GetPetByIdAsync(9999);
 
@@ -51,7 +57,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetAllPetsAsync_WhenPetsExist_ReturnArray()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var testPets = new List<Pet> 
             { 
@@ -77,7 +83,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task GetAllPetsAsync_WhenNoPetsExist_ReturnsEmptyList()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var result = await service.GetAllPetsAsync();
 
@@ -89,7 +95,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task AddPetAsync_WhenValidDTOProvided_SavesToDatabaseAndReturnDTO()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var commandDTO = new CommandPetDTO
             {
@@ -119,7 +125,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task OverridePetAsync_WhenPetExists_OverrideData()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Add(testPet);
@@ -144,7 +150,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task OverridePetAsync_WhenPetDoesntExist_ReturnFalse()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var testCommandPetDto = new CommandPetDTO
             {
@@ -161,7 +167,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeletePetAsync_WhenPetFoundAndDeleted_ReturnTrue()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var testPet = new Pet { Name = "Meowstarion" };
             context.Add(testPet);
@@ -178,12 +184,16 @@ namespace DidWeFeedTheCatToday.Tests.Services
         public async Task DeletePetAsync_WhenPetNotFound_ReturnFalse()
         {
             using var context = GetDbContext();
-            var service = new PetService(context);
+            var service = new PetService(context, _cache);
 
             var result = await service.DeletePetAsync(9999);
 
             result.Should().BeFalse();
         }
 
+        public void Dispose()
+        {
+            _cache.Dispose();
+        }
     }
 }
