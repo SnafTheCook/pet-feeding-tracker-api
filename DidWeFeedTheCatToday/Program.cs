@@ -72,6 +72,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddSignalR();
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddMemoryCache();
 builder.Services.AddMassTransit(x =>
 {
     if (isTesting)

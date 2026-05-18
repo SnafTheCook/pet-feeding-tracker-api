@@ -6,11 +6,16 @@ using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using DidWeFeedTheCatToday.Shared.Enums;
 using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
-    public class PetService(AppDbContext context) : IPetService
+    public class PetService(AppDbContext context, IMemoryCache cache) : IPetService
     {
+        private static CancellationTokenSource _resetCacheToken = new();
+        private readonly IMemoryCache _cache = cache;
+
         /// <summary>
         /// Retrieves a list of all pets.
         /// </summary>
@@ -45,53 +50,65 @@ namespace DidWeFeedTheCatToday.Services.Implementations
 
         public async Task<PagedResult<GetPetDTO>> GetPagedPetsAsync(int page, int pageSize, string? searchTerm, string? sortBy)
         {
-            var query = context.Pets.AsNoTracking();
+            string cacheKey = $"pets_{page}_{pageSize}_{searchTerm}_{sortBy}";
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (!_cache.TryGetValue(cacheKey, out PagedResult<GetPetDTO>? cachedResult))
             {
-                query = query.Where(p =>  p.Name.ToLower().Contains(searchTerm.ToLower()));
+                var query = context.Pets.AsNoTracking();
+
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    query = query.Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()));
+                }
+
+                var totalCount = await query.CountAsync();
+
+                query = sortBy?.ToLower() switch
+                {
+                    "age" => query.OrderBy(p => p.Age),
+                    "lastfed" => query.OrderByDescending(p =>
+                        p.FeedingTimes.Max(f => (DateTime?)f.FeedingTime)),
+                    _ => query.OrderBy(p => p.Name)
+                };
+
+                var items = await query
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(pet => new GetPetDTO
+                    {
+                        Id = pet.Id,
+                        Name = pet.Name,
+                        Age = pet.Age,
+                        AdditionalInformation = pet.AdditionalInformation,
+                        CreationDate = pet.CreationDate,
+                        RowVersion = pet.RowVersion,
+
+                        LastFed = pet.FeedingTimes
+                        .OrderByDescending(feeding => feeding.FeedingTime)
+                        .Select(feeding => feeding.FeedingTime)
+                        .FirstOrDefault(),
+
+                        Status = CalculateHunger(pet.FeedingTimes
+                        .OrderByDescending(feeding => feeding.FeedingTime)
+                        .Select(feeding => feeding.FeedingTime)
+                        .FirstOrDefault(), DateTime.UtcNow)
+                    })
+                    .ToListAsync();
+
+                cachedResult = new PagedResult<GetPetDTO>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    CurrentPage = page,
+                    PageSize = pageSize
+                };
+
+                _cache.Set(cacheKey, cachedResult, new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+                    .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token)));
             }
 
-            var totalCount = await query.CountAsync();
-
-            query = sortBy?.ToLower() switch
-            {
-                "age" => query.OrderBy(p => p.Age),
-                "lastfed" => query.OrderByDescending(p =>
-                    p.FeedingTimes.Max(f => (DateTime?)f.FeedingTime)),
-                _ => query.OrderBy(p => p.Name)
-            };
-
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(pet => new GetPetDTO {
-                    Id = pet.Id,
-                    Name = pet.Name,
-                    Age = pet.Age,
-                    AdditionalInformation = pet.AdditionalInformation,
-                    CreationDate = pet.CreationDate,
-                    RowVersion = pet.RowVersion,
-
-                    LastFed = pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(),
-
-                    Status = CalculateHunger(pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(), DateTime.UtcNow)
-                })
-                .ToListAsync();
-
-            return new PagedResult<GetPetDTO>
-            {
-                Items = items,
-                TotalCount = totalCount,
-                CurrentPage = page,
-                PageSize = pageSize
-            };
+            return cachedResult!;
         }
 
         /// <summary>
@@ -146,6 +163,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             context.Pets.Add(pet);
             await context.SaveChangesAsync();
 
+            ClearPetCache();
+
             return new GetPetDTO
             {
                 Id = pet.Id,
@@ -187,6 +206,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 return ServiceResult.Fail(ServiceResultError.ConcurrencyConflict);
             }
 
+            ClearPetCache();
+
             return ServiceResult.Ok();
         }
 
@@ -205,6 +226,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             context.Pets.Remove(petItem);
             await context.SaveChangesAsync();
 
+            ClearPetCache();
+
             return true;
         }
 
@@ -221,6 +244,13 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 < 10 => HungerStatus.Hungry,
                 _ => HungerStatus.Starving,
             };
+        }
+
+        private void ClearPetCache()
+        {
+            _resetCacheToken.Cancel();
+            _resetCacheToken.Dispose();
+            _resetCacheToken = new CancellationTokenSource();
         }
     }
 }
