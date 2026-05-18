@@ -7,11 +7,13 @@ using DidWeFeedTheCatToday.Shared.Enums;
 using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 
 namespace DidWeFeedTheCatToday.Services.Implementations
 {
     public class PetService(AppDbContext context, IMemoryCache cache) : IPetService
     {
+        private static CancellationTokenSource _resetCacheToken = new();
         private readonly IMemoryCache _cache = cache;
 
         /// <summary>
@@ -101,7 +103,9 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     PageSize = pageSize
                 };
 
-                _cache.Set(cacheKey, cachedResult, TimeSpan.FromMinutes(5));
+                _cache.Set(cacheKey, cachedResult, new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+                    .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token)));
             }
 
             return cachedResult!;
@@ -159,6 +163,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             context.Pets.Add(pet);
             await context.SaveChangesAsync();
 
+            ClearPetCache();
+
             return new GetPetDTO
             {
                 Id = pet.Id,
@@ -200,6 +206,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 return ServiceResult.Fail(ServiceResultError.ConcurrencyConflict);
             }
 
+            ClearPetCache();
+
             return ServiceResult.Ok();
         }
 
@@ -218,6 +226,8 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             context.Pets.Remove(petItem);
             await context.SaveChangesAsync();
 
+            ClearPetCache();
+
             return true;
         }
 
@@ -234,6 +244,13 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 < 10 => HungerStatus.Hungry,
                 _ => HungerStatus.Starving,
             };
+        }
+
+        private void ClearPetCache()
+        {
+            _resetCacheToken.Cancel();
+            _resetCacheToken.Dispose();
+            _resetCacheToken = new CancellationTokenSource();
         }
     }
 }
