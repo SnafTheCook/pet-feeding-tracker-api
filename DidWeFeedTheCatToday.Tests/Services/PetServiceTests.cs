@@ -81,6 +81,24 @@ namespace DidWeFeedTheCatToday.Tests.Services
         }
 
         [Fact]
+        public async Task GetPagedPetsAsync_WhenCalledTwice_ReturnsCachedDataEvenIfDbIsCleared()
+        {
+            var pet = new Pet { Name = "cacheTest" };
+            _context.Pets.Add(pet);
+            await _context.SaveChangesAsync();
+
+            await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            _context.Pets.RemoveRange(_context.Pets);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            result.Items.Should().NotBeEmpty();
+            result.Items.First().Name.Should().Be("cacheTest");
+        }
+
+        [Fact]
         public async Task AddPetAsync_WhenValidDTOProvided_SavesToDatabaseAndReturnDTO()
         {
             var commandDTO = new CommandPetDTO
