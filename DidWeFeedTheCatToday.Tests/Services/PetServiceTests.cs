@@ -124,6 +124,19 @@ namespace DidWeFeedTheCatToday.Tests.Services
         }
 
         [Fact]
+        public async Task AddPetAsync_WhenNewPetAdded_ShouldInvalidateCache()
+        {
+            await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            var newPet = new CommandPetDTO { Name = "newPet" };
+            await _service.AddPetAsync(newPet);
+
+            var result = await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            result.Items.Should().Contain(p => p.Name == "newPet");
+        }
+
+        [Fact]
         public async Task OverridePetAsync_WhenPetExists_OverrideData()
         {
             var testPet = new Pet { Name = "Meowstarion" };
