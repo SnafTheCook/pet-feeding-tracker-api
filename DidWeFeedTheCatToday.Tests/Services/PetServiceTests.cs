@@ -99,6 +99,23 @@ namespace DidWeFeedTheCatToday.Tests.Services
         }
 
         [Fact]
+        public async Task GetPagedPetsAsync_WhenRequestingSecondPage_ReturnsCorrectSlice()
+        {
+            for (int i = 1; i <= 7; i++)
+            {
+                _context.Pets.Add(new Pet { Name = $"Pet {i}" });
+            }
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetPagedPetsAsync(page: 2, pageSize: 5, searchTerm: null, sortBy: "name");
+
+            result.Items.Should().HaveCount(2);
+            result.TotalCount.Should().Be(7);
+            result.CurrentPage.Should().Be(2);
+            result.TotalPages.Should().Be(2);
+        }
+
+        [Fact]
         public async Task AddPetAsync_WhenValidDTOProvided_SavesToDatabaseAndReturnDTO()
         {
             var commandDTO = new CommandPetDTO
@@ -196,6 +213,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
 
         public void Dispose()
         {
+            _context.Database.EnsureDeleted();
             _context.Dispose();
             _cache.Dispose();
         }
