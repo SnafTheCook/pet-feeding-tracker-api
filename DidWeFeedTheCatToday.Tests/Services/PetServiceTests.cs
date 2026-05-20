@@ -11,31 +11,29 @@ namespace DidWeFeedTheCatToday.Tests.Services
 {
     public class PetServiceTests : IDisposable
     {
+        private readonly AppDbContext _context;
+        private readonly PetService _service;
         private readonly IMemoryCache _cache;
         public PetServiceTests()
-        {
-            _cache = new MemoryCache(new MemoryCacheOptions());
-        }
-        private AppDbContext GetDbContext()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            return new AppDbContext(options);
+            _context = new AppDbContext(options);
+            
+            _cache = new MemoryCache(new MemoryCacheOptions());
+            _service = new PetService(_context, _cache);
         }
 
         [Fact]
         public async Task GetPetByIdAsync_WhenPetExists_ReturnsPetDto()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var testPet = new Pet { Name = "Meowstarion" };
-            context.Add(testPet);
-            await context.SaveChangesAsync();
+            _context.Add(testPet);
+            await _context.SaveChangesAsync();
 
-            var result = await service.GetPetByIdAsync(1);
+            var result = await _service.GetPetByIdAsync(1);
 
             result.Should().NotBeNull();
             result!.Name.Should().Be("Meowstarion");
@@ -45,10 +43,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
         [Fact]
         public async Task GetPetByIdAsync_WhenPetDoesNotExist_ReturnsNull()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
-            var result = await service.GetPetByIdAsync(9999);
+            var result = await _service.GetPetByIdAsync(9999);
 
             result.Should().BeNull();
         }
@@ -56,9 +51,6 @@ namespace DidWeFeedTheCatToday.Tests.Services
         [Fact]
         public async Task GetAllPetsAsync_WhenPetsExist_ReturnArray()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var testPets = new List<Pet> 
             { 
                 new Pet { Name = "Meowstarion"},
@@ -66,10 +58,10 @@ namespace DidWeFeedTheCatToday.Tests.Services
                 new Pet { Name = "Shadowcar"},
             };
 
-            await context.AddRangeAsync(testPets);
-            await context.SaveChangesAsync();
+            await _context.AddRangeAsync(testPets);
+            await _context.SaveChangesAsync();
 
-            var result = await service.GetAllPetsAsync();
+            var result = await _service.GetAllPetsAsync();
 
             result.Should().NotBeNull();
             result.Should().HaveCount(3);
@@ -82,21 +74,50 @@ namespace DidWeFeedTheCatToday.Tests.Services
         [Fact]
         public async Task GetAllPetsAsync_WhenNoPetsExist_ReturnsEmptyList()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
-            var result = await service.GetAllPetsAsync();
+            var result = await _service.GetAllPetsAsync();
 
             result.Should().NotBeNull();
             result.Should().BeEmpty();
         }
 
         [Fact]
+        public async Task GetPagedPetsAsync_WhenCalledTwice_ReturnsCachedDataEvenIfDbIsCleared()
+        {
+            var pet = new Pet { Name = "cacheTest" };
+            _context.Pets.Add(pet);
+            await _context.SaveChangesAsync();
+
+            await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            _context.Pets.RemoveRange(_context.Pets);
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            result.Items.Should().NotBeEmpty();
+            result.Items.First().Name.Should().Be("cacheTest");
+        }
+
+        [Fact]
+        public async Task GetPagedPetsAsync_WhenRequestingSecondPage_ReturnsCorrectSlice()
+        {
+            for (int i = 1; i <= 7; i++)
+            {
+                _context.Pets.Add(new Pet { Name = $"Pet {i}" });
+            }
+            await _context.SaveChangesAsync();
+
+            var result = await _service.GetPagedPetsAsync(page: 2, pageSize: 5, searchTerm: null, sortBy: "name");
+
+            result.Items.Should().HaveCount(2);
+            result.TotalCount.Should().Be(7);
+            result.CurrentPage.Should().Be(2);
+            result.TotalPages.Should().Be(2);
+        }
+
+        [Fact]
         public async Task AddPetAsync_WhenValidDTOProvided_SavesToDatabaseAndReturnDTO()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var commandDTO = new CommandPetDTO
             {
                 Name = "Meowstarion",
@@ -104,9 +125,8 @@ namespace DidWeFeedTheCatToday.Tests.Services
                 AdditionalInformation = "Sneaky one."
             };
 
-            var result = await service.AddPetAsync(commandDTO);
+            var result = await _service.AddPetAsync(commandDTO);
 
-            //checking returend GetPetDTO
             result.Should().NotBeNull();
             result.Name.Should().Be("Meowstarion");
             result.Id.Should().BeGreaterThan(0);
@@ -114,33 +134,42 @@ namespace DidWeFeedTheCatToday.Tests.Services
             result.CreationDate.Should().NotBeNull();
             result.CreationDate.Value.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
 
-            //checking state in db
-            var petInDb = await context.Pets.FirstOrDefaultAsync(pet => pet.Id == result.Id);
+            var petInDb = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == result.Id);
             petInDb.Should().NotBeNull();
             petInDb.Name.Should().Be("Meowstarion");
             petInDb.CreationDate.Should().NotBeNull();
         }
 
         [Fact]
+        public async Task AddPetAsync_WhenNewPetAdded_ShouldInvalidateCache()
+        {
+            await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            var newPet = new CommandPetDTO { Name = "newPet" };
+            await _service.AddPetAsync(newPet);
+
+            var result = await _service.GetPagedPetsAsync(1, 10, null, "name");
+
+            result.Items.Should().Contain(p => p.Name == "newPet");
+        }
+
+        [Fact]
         public async Task OverridePetAsync_WhenPetExists_OverrideData()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var testPet = new Pet { Name = "Meowstarion" };
-            context.Add(testPet);
-            await context.SaveChangesAsync();
+            _context.Add(testPet);
+            await _context.SaveChangesAsync();
 
             var testCommandPetDto = new CommandPetDTO
             {
                 Name = "Katlach"
             };
 
-            var result = await service.OverridePetAsync(testPet.Id, testCommandPetDto);
+            var result = await _service.OverridePetAsync(testPet.Id, testCommandPetDto);
 
             result.Success.Should().BeTrue();
 
-            var overrodePet = await context.Pets.FirstOrDefaultAsync(pet => pet.Id == testPet.Id);
+            var overrodePet = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == testPet.Id);
 
             overrodePet.Should().NotBeNull();
             overrodePet.Name.Should().Be("Katlach");
@@ -149,15 +178,12 @@ namespace DidWeFeedTheCatToday.Tests.Services
         [Fact]
         public async Task OverridePetAsync_WhenPetDoesntExist_ReturnFalse()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var testCommandPetDto = new CommandPetDTO
             {
                 Name = "Katlach"
             };
 
-            var result = await service.OverridePetAsync(9999, testCommandPetDto);
+            var result = await _service.OverridePetAsync(9999, testCommandPetDto);
 
             result.Success.Should().BeFalse();
             result.Error.Should().Be(ServiceResultError.NotFound);
@@ -166,33 +192,29 @@ namespace DidWeFeedTheCatToday.Tests.Services
         [Fact]
         public async Task DeletePetAsync_WhenPetFoundAndDeleted_ReturnTrue()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
             var testPet = new Pet { Name = "Meowstarion" };
-            context.Add(testPet);
-            await context.SaveChangesAsync();
+            _context.Add(testPet);
+            await _context.SaveChangesAsync();
 
-            var result = await service.DeletePetAsync(testPet.Id);
+            var result = await _service.DeletePetAsync(testPet.Id);
             result.Should().BeTrue();
 
-            var petInDb = await context.Pets.FindAsync(testPet.Id);
+            var petInDb = await _context.Pets.FindAsync(testPet.Id);
             petInDb.Should().BeNull();
         }
 
         [Fact]
         public async Task DeletePetAsync_WhenPetNotFound_ReturnFalse()
         {
-            using var context = GetDbContext();
-            var service = new PetService(context, _cache);
-
-            var result = await service.DeletePetAsync(9999);
+            var result = await _service.DeletePetAsync(9999);
 
             result.Should().BeFalse();
         }
 
         public void Dispose()
         {
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
             _cache.Dispose();
         }
     }
