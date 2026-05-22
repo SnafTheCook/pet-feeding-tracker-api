@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Hubs;
@@ -87,6 +88,17 @@ builder.Services.AddMassTransit(x =>
             cfg.ConfigureEndpoints(context);
         });
     }
+});
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 var app = builder.Build();
