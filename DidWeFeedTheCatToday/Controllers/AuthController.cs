@@ -1,11 +1,13 @@
-﻿using DidWeFeedTheCatToday.Services.Interfaces;
+﻿using Asp.Versioning;
+using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
-    [Route("api/auth")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class AuthController(IAuthServices authService) : ControllerBase
     {
