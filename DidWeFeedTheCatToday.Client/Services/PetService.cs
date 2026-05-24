@@ -12,7 +12,7 @@ namespace DidWeFeedTheCatToday.Client.Services
         {
 			try
 			{
-				var response = await http.GetFromJsonAsync<ApiResponse<IEnumerable<GetPetDTO>>>("api/pets");
+				var response = await http.GetFromJsonAsync<ApiResponse<IEnumerable<GetPetDTO>>>("api/v1/pets");
 				return response?.Data?.ToList() ?? new List<GetPetDTO>();
 			}
 			catch (Exception e)
@@ -24,7 +24,7 @@ namespace DidWeFeedTheCatToday.Client.Services
 
 		public async Task<PagedResult<GetPetDTO>> GetPetsAsync(int page, string? search, string? sortBy)
 		{
-            var url = $"api/pets?page={page}&search={search}&sortBy={sortBy}";
+            var url = $"api/v1/pets?page={page}&search={search}&sortBy={sortBy}";
 			var response = await http.GetFromJsonAsync<ApiResponse<PagedResult<GetPetDTO>>>(url);
 			return response?.Data ?? new PagedResult<GetPetDTO>();
         }
@@ -33,7 +33,7 @@ namespace DidWeFeedTheCatToday.Client.Services
 		{
 			try
 			{
-				var url = $"api/pets/{id}";
+				var url = $"api/v1/pets/{id}";
 				var response = await http.GetAsync(url);
 
 				if (response.IsSuccessStatusCode)
@@ -68,13 +68,13 @@ namespace DidWeFeedTheCatToday.Client.Services
 
         public async Task<bool> AddPetAsync(CommandPetDTO petToAdd)
         {
-            var response = await http.PostAsJsonAsync("api/pets", petToAdd);
+            var response = await http.PostAsJsonAsync("api/v1/pets", petToAdd);
             return response.IsSuccessStatusCode;
         }
 
 		public async Task<bool> DeletePetAsync(int id)
 		{
-			var response = await http.DeleteAsync($"api/pets/{id}");
+			var response = await http.DeleteAsync($"api/v1/pets/{id}");
 			return response.IsSuccessStatusCode;
 		}
 
@@ -86,7 +86,7 @@ namespace DidWeFeedTheCatToday.Client.Services
 
 		public async Task<bool> UpdatePetAsync(int id, CommandPetDTO petToUpdate)
 		{
-			var response = await http.PutAsJsonAsync($"api/pets/{id}", petToUpdate);
+			var response = await http.PutAsJsonAsync($"api/v1/pets/{id}", petToUpdate);
 			return response.IsSuccessStatusCode;
 		}
     }

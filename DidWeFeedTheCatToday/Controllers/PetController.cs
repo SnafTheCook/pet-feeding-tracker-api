@@ -1,11 +1,13 @@
-﻿using DidWeFeedTheCatToday.Services.Interfaces;
+﻿using Asp.Versioning;
+using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
-    [Route("api/pets")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/pets")]
     [ApiController]
     public class PetController(IPetService petService) : ControllerBase
     {

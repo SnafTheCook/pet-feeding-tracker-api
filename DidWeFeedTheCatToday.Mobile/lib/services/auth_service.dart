@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pet_api_mobile/models/result.dart';
 
 class AuthService {
-  final String _baseUrl = "http://localhost:8080/api/auth";
+  final String _baseUrl = "http://localhost:8080/api/auth/v1";
 
   Future<Result<String>> login(String username, String password) async {
     try {

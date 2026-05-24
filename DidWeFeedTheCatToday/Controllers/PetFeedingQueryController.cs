@@ -1,4 +1,5 @@
-﻿using DidWeFeedTheCatToday.Entities;
+﻿using Asp.Versioning;
+using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
@@ -8,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
-    [Route("api/pet-feedings")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/pet-feedings")]
     [ApiController]
     public class PetFeedingQueryController(IPetFeedingQueryService petFeedingQueryService) : ControllerBase
     {

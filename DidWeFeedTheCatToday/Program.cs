@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Hubs;
@@ -24,7 +25,14 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(ValidationFilter));
 });
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "Was The Cat Fed Today? API v1";
+        return Task.CompletedTask;
+    });
+});
 if (isTesting)
 {
     //
@@ -87,6 +95,17 @@ builder.Services.AddMassTransit(x =>
             cfg.ConfigureEndpoints(context);
         });
     }
+});
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 var app = builder.Build();
