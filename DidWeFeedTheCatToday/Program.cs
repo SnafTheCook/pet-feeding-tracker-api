@@ -25,7 +25,14 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(ValidationFilter));
 });
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info.Title = "Was The Cat Fed Today? API v1";
+        return Task.CompletedTask;
+    });
+});
 if (isTesting)
 {
     //
