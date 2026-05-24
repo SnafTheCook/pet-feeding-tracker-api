@@ -4,7 +4,7 @@ import 'package:pet_api_mobile/models/result.dart';
 import '../models/pet_dto.dart';
 
 class ApiService {
-  final String _baseUrl = "http://localhost:8080/api"; 
+  final String _baseUrl = "http://localhost:8080/api/v1"; 
 
   Future<Result<List<PetDto>>> getPets(String? token) async
   {

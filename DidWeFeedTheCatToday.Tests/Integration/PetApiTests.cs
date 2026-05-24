@@ -17,7 +17,7 @@ namespace DidWeFeedTheCatToday.Tests.Integration
         {
             var request = new { Name = "Meowstarion", Age = 2 };
 
-            var response = await _httpClient.PostAsJsonAsync("api/pets", request);
+            var response = await _httpClient.PostAsJsonAsync("api/v1/pets", request);
 
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
         }
@@ -27,7 +27,7 @@ namespace DidWeFeedTheCatToday.Tests.Integration
         {
             var request = new { Name = "Meow", Age = 2 };
 
-            var response = await _httpClient.PostAsJsonAsync("api/pets", request);
+            var response = await _httpClient.PostAsJsonAsync("api/v1/pets", request);
 
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
         }
