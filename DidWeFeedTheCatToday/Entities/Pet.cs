@@ -9,5 +9,8 @@
         public int? Age { get; set; }
         public string? AdditionalInformation { get; set; }
         public List<Feeding> FeedingTimes { get; set; } = new List<Feeding>();
+        public bool IsDeleted {  get; private set; }
+        public void MarkAsDeleted() => IsDeleted = true;
+        public void Restore() => IsDeleted = false;
     }
 }
