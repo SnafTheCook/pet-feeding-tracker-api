@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DidWeFeedTheCatToday.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/pets")]
     [ApiController]
     public class PetController(IPetService petService) : ControllerBase
     {

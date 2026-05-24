@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DidWeFeedTheCatToday.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v{version:apiVersion}/pet-feedings")]
     [ApiController]
     public class PetFeedingQueryController(IPetFeedingQueryService petFeedingQueryService) : ControllerBase
     {
