@@ -223,7 +223,24 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             if (petItem == null)
                 return false;
 
-            context.Pets.Remove(petItem);
+            petItem.MarkAsDeleted();
+            await context.SaveChangesAsync();
+
+            ClearPetCache();
+
+            return true;
+        }
+
+        public async Task<bool> RestorePetAsync(int id)
+        {
+            var pet = await context.Pets
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pet == null) 
+                return false;
+
+            pet.Restore();
             await context.SaveChangesAsync();
 
             ClearPetCache();
