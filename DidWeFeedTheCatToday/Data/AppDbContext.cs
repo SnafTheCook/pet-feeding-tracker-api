@@ -43,6 +43,8 @@ namespace DidWeFeedTheCatToday.Data
                 .Property(p => p.RowVersion)
                 .IsRowVersion();
 
+            modelBuilder.Entity<Pet>().HasQueryFilter(p => !p.IsDeleted);
+
         }
     }
 }
