@@ -199,8 +199,15 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var result = await _service.DeletePetAsync(testPet.Id);
             result.Should().BeTrue();
 
-            var petInDb = await _context.Pets.FindAsync(testPet.Id);
-            petInDb.Should().BeNull();
+            var petInDb = await _context.Pets
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == testPet.Id);
+
+            petInDb.Should().NotBeNull();
+            petInDb!.IsDeleted.Should().BeTrue();
+
+            var petHidden = await _context.Pets.FirstOrDefaultAsync(p => p.Id == testPet.Id);
+            petHidden.Should().BeNull();
         }
 
         [Fact]
