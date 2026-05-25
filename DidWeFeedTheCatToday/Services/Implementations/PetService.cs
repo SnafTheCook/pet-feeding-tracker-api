@@ -223,7 +223,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             if (petItem == null)
                 return false;
 
-            context.Pets.Remove(petItem);
+            petItem.MarkAsDeleted();
             await context.SaveChangesAsync();
 
             ClearPetCache();
