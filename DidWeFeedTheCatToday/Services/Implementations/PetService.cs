@@ -231,6 +231,23 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             return true;
         }
 
+        public async Task<bool> RestorePetAsync(int id)
+        {
+            var pet = await context.Pets
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pet == null) 
+                return false;
+
+            pet.Restore();
+            await context.SaveChangesAsync();
+
+            ClearPetCache();
+
+            return true;
+        }
+
         private static HungerStatus CalculateHunger(DateTime? lastFed, DateTime now)
         {
             if (lastFed == null) return HungerStatus.Starving;

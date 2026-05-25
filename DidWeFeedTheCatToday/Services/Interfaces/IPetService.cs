@@ -11,5 +11,6 @@ namespace DidWeFeedTheCatToday.Services.Interfaces
         Task<GetPetDTO> AddPetAsync(CommandPetDTO petToAdd);
         Task<ServiceResult> OverridePetAsync(int id, CommandPetDTO petToOverride);
         Task<bool> DeletePetAsync(int id);
+        Task<bool> RestorePetAsync(int id);
     }
 }
