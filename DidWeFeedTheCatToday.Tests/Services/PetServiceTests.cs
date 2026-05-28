@@ -137,7 +137,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var petInDb = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == result.Id);
             petInDb.Should().NotBeNull();
             petInDb.Name.Should().Be("Meowstarion");
-            petInDb.CreationDate.Should().NotBeNull();
+            petInDb.CreatedAt.Should().NotBeNull();
         }
 
         [Fact]

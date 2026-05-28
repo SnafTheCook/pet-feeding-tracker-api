@@ -32,7 +32,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     Name = pet.Name,
                     Age = pet.Age,
                     AdditionalInformation = pet.AdditionalInformation,
-                    CreationDate = pet.CreationDate,
+                    CreationDate = pet.CreatedAt,
                     RowVersion = pet.RowVersion,
 
                     LastFed = pet.FeedingTimes
@@ -80,7 +80,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                         Name = pet.Name,
                         Age = pet.Age,
                         AdditionalInformation = pet.AdditionalInformation,
-                        CreationDate = pet.CreationDate,
+                        CreationDate = pet.CreatedAt,
                         RowVersion = pet.RowVersion,
 
                         LastFed = pet.FeedingTimes
@@ -128,7 +128,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     Name = pet.Name,
                     Age = pet.Age,
                     AdditionalInformation = pet.AdditionalInformation,
-                    CreationDate = pet.CreationDate,
+                    CreationDate = pet.CreatedAt,
                     RowVersion = pet.RowVersion,
 
                     LastFed = pet.FeedingTimes
@@ -156,7 +156,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 Name = petToAdd.Name,
                 Age = petToAdd.Age,
                 AdditionalInformation = petToAdd.AdditionalInformation,
-                CreationDate = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow
             };
             
 
@@ -171,7 +171,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 Name = pet.Name,
                 Age = pet.Age,
                 AdditionalInformation = pet.AdditionalInformation,
-                CreationDate = pet.CreationDate
+                CreationDate = pet.CreatedAt
             };
         }
 
