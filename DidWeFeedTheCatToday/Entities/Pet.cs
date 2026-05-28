@@ -1,6 +1,8 @@
-﻿namespace DidWeFeedTheCatToday.Entities
+﻿using DidWeFeedTheCatToday.Shared.Interfaces;
+
+namespace DidWeFeedTheCatToday.Entities
 {
-    public class Pet
+    public class Pet : IAuditable
     {
         public int Id { get; set; }
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
@@ -10,6 +12,9 @@
         public string? AdditionalInformation { get; set; }
         public List<Feeding> FeedingTimes { get; set; } = new List<Feeding>();
         public bool IsDeleted {  get; private set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastModifiedAt { get; set; }
+
         public void MarkAsDeleted() => IsDeleted = true;
         public void Restore() => IsDeleted = false;
     }
