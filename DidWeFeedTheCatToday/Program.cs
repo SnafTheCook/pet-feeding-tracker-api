@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Middleware;
 using DidWeFeedTheCatToday.Services.Implementations;
@@ -33,13 +34,20 @@ builder.Services.AddOpenApi(options =>
         return Task.CompletedTask;
     });
 });
+
+builder.Services.AddSingleton<UpdateAuditableInterceptor>();
+
 if (isTesting)
 {
     //
 }
 else
 {
-    builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddDbContext<AppDbContext>((sp, opt) =>
+    {
+        var interceptor = sp.GetRequiredService<UpdateAuditableInterceptor>();
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
 }
 
 var jwtKey = string.IsNullOrEmpty(appSettings.Token)
