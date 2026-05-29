@@ -46,7 +46,8 @@ else
     builder.Services.AddDbContext<AppDbContext>((sp, opt) =>
     {
         var interceptor = sp.GetRequiredService<UpdateAuditableInterceptor>();
-        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .AddInterceptors(interceptor);
     });
 }
 

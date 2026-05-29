@@ -156,7 +156,6 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 Name = petToAdd.Name,
                 Age = petToAdd.Age,
                 AdditionalInformation = petToAdd.AdditionalInformation,
-                CreatedAt = DateTime.UtcNow
             };
             
 
