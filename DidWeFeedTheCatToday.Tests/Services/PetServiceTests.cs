@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Shared.Common;
@@ -14,10 +15,12 @@ namespace DidWeFeedTheCatToday.Tests.Services
         private readonly AppDbContext _context;
         private readonly PetService _service;
         private readonly IMemoryCache _cache;
+        private readonly UpdateAuditableInterceptor _auditingInterceptor = new();
         public PetServiceTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .AddInterceptors(_auditingInterceptor)
                 .Options;
 
             _context = new AppDbContext(options);
@@ -137,7 +140,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
             var petInDb = await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == result.Id);
             petInDb.Should().NotBeNull();
             petInDb.Name.Should().Be("Meowstarion");
-            petInDb.CreationDate.Should().NotBeNull();
+            petInDb.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         }
 
         [Fact]
