@@ -90,6 +90,7 @@ builder.Services.AddSignalR();
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddMemoryCache();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 builder.Services.AddMassTransit(x =>
 {
     if (isTesting)
