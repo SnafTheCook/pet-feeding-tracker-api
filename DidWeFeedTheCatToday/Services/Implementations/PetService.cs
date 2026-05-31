@@ -262,7 +262,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             };
         }
 
-        private void ClearPetCache()
+        public static void ClearPetCache()
         {
             _resetCacheToken.Cancel();
             _resetCacheToken.Dispose();
