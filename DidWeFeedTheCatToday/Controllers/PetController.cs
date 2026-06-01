@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using DidWeFeedTheCatToday.Features.Pets;
+using DidWeFeedTheCatToday.Features.Pets.Queries;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -43,7 +44,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetPetDTO>>> GetPetById(int id)
         {
-            var result = await petService.GetPetByIdAsync(id);
+            var result = await mediator.Send(new GetPetByIdQuery(id));
 
             if (result == null)
                 return NotFound(ApiResponse<GetPetDTO>.Fail("No Pet found under index."));
