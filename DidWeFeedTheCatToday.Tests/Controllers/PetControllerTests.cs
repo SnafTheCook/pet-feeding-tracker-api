@@ -1,8 +1,10 @@
 ﻿using DidWeFeedTheCatToday.Controllers;
+using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -10,13 +12,15 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
 {
     public class PetControllerTests
     {
+        private readonly Mock<IMediator> _mockMediator;
         private readonly Mock<IPetService> _mockPetService;
         private readonly PetController _petController;
 
         public PetControllerTests()
         {
             _mockPetService = new Mock<IPetService>();
-            _petController = new PetController(_mockPetService.Object);
+            _mockMediator = new Mock<IMediator>();
+            _petController = new PetController(_mockPetService.Object, _mockMediator.Object);
         }
 
         [Fact]
@@ -61,8 +65,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             var testPet = new CommandPetDTO { Name = "MeowstarionPost" };
             var returnedPet = new GetPetDTO { Name = "MeowstarionGet", Id = 1 };
 
-            _mockPetService
-                .Setup(setup => setup.AddPetAsync(testPet))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<AddPetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(returnedPet);
 
             var result = await _petController.PostPet(testPet);
@@ -74,7 +78,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Data.Id.Should().Be(returnedPet.Id);
             apiResponse.Data.Name.Should().Be(returnedPet.Name);
 
-            _mockPetService.Verify(v => v.AddPetAsync(testPet), Times.Once);
+            _mockMediator.Verify(m => m.Send(It.IsAny<AddPetCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]

@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
+using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DidWeFeedTheCatToday.Controllers
@@ -9,7 +11,7 @@ namespace DidWeFeedTheCatToday.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/pets")]
     [ApiController]
-    public class PetController(IPetService petService) : ControllerBase
+    public class PetController(IPetService petService, IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Retrieves all pets from the database.
@@ -56,7 +58,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<GetPetDTO>>> PostPet(CommandPetDTO petDTO)
         {
-            var result = await petService.AddPetAsync(petDTO);
+            var result = await mediator.Send(new AddPetCommand(petDTO));
 
             return CreatedAtAction(nameof(GetPetById), new { id = result.Id }, ApiResponse<GetPetDTO>.Ok(result));
         }
