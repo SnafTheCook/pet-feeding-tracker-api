@@ -4,6 +4,7 @@ using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using DidWeFeedTheCatToday.Shared.Enums;
+using DidWeFeedTheCatToday.Shared.Utils;
 using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -40,7 +41,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     .Select(feeding => feeding.FeedingTime)
                     .FirstOrDefault(),
 
-                    Status = CalculateHunger(pet.FeedingTimes
+                    Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
                     .OrderByDescending(feeding => feeding.FeedingTime)
                     .Select(feeding => feeding.FeedingTime)
                     .FirstOrDefault(), now)
@@ -88,7 +89,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                         .Select(feeding => feeding.FeedingTime)
                         .FirstOrDefault(),
 
-                        Status = CalculateHunger(pet.FeedingTimes
+                        Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
                         .OrderByDescending(feeding => feeding.FeedingTime)
                         .Select(feeding => feeding.FeedingTime)
                         .FirstOrDefault(), DateTime.UtcNow)
@@ -136,7 +137,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                     .Select(feeding => feeding.FeedingTime)
                     .FirstOrDefault(),
 
-                    Status = CalculateHunger(pet.FeedingTimes
+                    Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
                     .OrderByDescending(feeding => feeding.FeedingTime)
                     .Select(feeding => feeding.FeedingTime)
                     .FirstOrDefault(), now)
@@ -245,21 +246,6 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             ClearPetCache();
 
             return true;
-        }
-
-        private static HungerStatus CalculateHunger(DateTime? lastFed, DateTime now)
-        {
-            if (lastFed == null) return HungerStatus.Starving;
-
-            var hoursSinceLastFeeding = (now - lastFed.Value).TotalHours;
-
-            return hoursSinceLastFeeding switch
-            {
-                < 2 => HungerStatus.Full,
-                < 5 => HungerStatus.Content,
-                < 10 => HungerStatus.Hungry,
-                _ => HungerStatus.Starving,
-            };
         }
 
         public static void ClearPetCache()

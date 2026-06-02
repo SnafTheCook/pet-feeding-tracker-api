@@ -1,5 +1,6 @@
 ﻿using DidWeFeedTheCatToday.Controllers;
 using DidWeFeedTheCatToday.Features.Pets;
+using DidWeFeedTheCatToday.Features.Pets.Queries;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -29,8 +30,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             var petId = 1;
             var petDto = new GetPetDTO { Id = petId, Name = "Meowstarion" };
 
-            _mockPetService
-                .Setup(setup => setup.GetPetByIdAsync(petId))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<GetPetByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(petDto);
 
             var result = await _petController.GetPetById(petId);
