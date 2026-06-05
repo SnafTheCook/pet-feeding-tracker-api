@@ -51,6 +51,13 @@ namespace DidWeFeedTheCatToday.Controllers
 
             return Ok(ApiResponse<GetPetDTO>.Ok(result));
         }
+
+        [HttpGet("stats")]
+        public async Task<ActionResult<ApiResponse<PetStatsDTO>>> GetStats()
+        {
+            var result = await mediator.Send(new GetPetStatsQuery());
+            return Ok(ApiResponse<PetStatsDTO>.Ok(result));
+        }
         /// <summary>
         /// Persists a pet.
         /// </summary>
