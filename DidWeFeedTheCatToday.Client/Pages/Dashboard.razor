@@ -1,0 +1,43 @@
+﻿@using Shared.DTOs.Pets
+@using Shared.Common
+@page "/"
+@inject HttpClient Http
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body text-center">
+                <h3>@stats?.TotalPets</h3>
+                <p>Total Pets</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body text-center">
+                <h3>@stats?.HungryPets</h3>
+                <p>Hungry Now</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body text-center">
+                <h3>@stats?.FedTodayCount</h3>
+                <p>Feedings Today</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private PetStatsDTO? stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Http.GetFromJsonAsync<ApiResponse<PetStatsDTO>>("api/v1/pets/stats");
+        stats = response?.Data;
+    }
+}
