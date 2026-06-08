@@ -34,7 +34,7 @@ namespace DidWeFeedTheCatToday.Features.Pets.Queries
                 {
                     p.Id,
                     p.Name,
-                    p.Age
+                    p.Age,
                     p.AdditionalInformation,
                     p.RowVersion,
                     p.CreatedAt,
