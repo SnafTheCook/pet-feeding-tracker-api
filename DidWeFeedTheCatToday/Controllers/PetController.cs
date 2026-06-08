@@ -33,7 +33,8 @@ namespace DidWeFeedTheCatToday.Controllers
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = "name")
         {
-            var result = await petService.GetPagedPetsAsync(page, pageSize, search, sortBy);
+            var query = new GetPagedPetsQuery(page, pageSize, search, sortBy);
+            var result = await mediator.Send(query);
             return Ok(ApiResponse<PagedResult<GetPetDTO>>.Ok(result));
         }
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -15,165 +16,6 @@ namespace DidWeFeedTheCatToday.Services.Implementations
     public class PetService(AppDbContext context, IMemoryCache cache) : IPetService
     {
         private static CancellationTokenSource _resetCacheToken = new();
-        private readonly IMemoryCache _cache = cache;
-
-        /// <summary>
-        /// Retrieves a list of all pets.
-        /// </summary>
-        /// <returns>A collection of <see cref="GetPetDTO"/>. Returns an empty list if no pets exist.</returns>
-        public async Task<IEnumerable<GetPetDTO>> GetAllPetsAsync()
-        {
-            var now = DateTime.UtcNow;
-
-            return await context.Pets
-                .AsNoTracking()
-                .Select(pet => new GetPetDTO
-                {
-                    Id = pet.Id,
-                    Name = pet.Name,
-                    Age = pet.Age,
-                    AdditionalInformation = pet.AdditionalInformation,
-                    CreationDate = pet.CreatedAt,
-                    RowVersion = pet.RowVersion,
-
-                    LastFed = pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(),
-
-                    Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(), now)
-                })
-                .ToListAsync();
-        }
-
-        public async Task<PagedResult<GetPetDTO>> GetPagedPetsAsync(int page, int pageSize, string? searchTerm, string? sortBy)
-        {
-            string cacheKey = $"pets_{page}_{pageSize}_{searchTerm}_{sortBy}";
-
-            if (!_cache.TryGetValue(cacheKey, out PagedResult<GetPetDTO>? cachedResult))
-            {
-                var query = context.Pets.AsNoTracking();
-
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    query = query.Where(p => p.Name.ToLower().Contains(searchTerm.ToLower()));
-                }
-
-                var totalCount = await query.CountAsync();
-
-                query = sortBy?.ToLower() switch
-                {
-                    "age" => query.OrderBy(p => p.Age),
-                    "lastfed" => query.OrderByDescending(p =>
-                        p.FeedingTimes.Max(f => (DateTime?)f.FeedingTime)),
-                    _ => query.OrderBy(p => p.Name)
-                };
-
-                var items = await query
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(pet => new GetPetDTO
-                    {
-                        Id = pet.Id,
-                        Name = pet.Name,
-                        Age = pet.Age,
-                        AdditionalInformation = pet.AdditionalInformation,
-                        CreationDate = pet.CreatedAt,
-                        RowVersion = pet.RowVersion,
-
-                        LastFed = pet.FeedingTimes
-                        .OrderByDescending(feeding => feeding.FeedingTime)
-                        .Select(feeding => feeding.FeedingTime)
-                        .FirstOrDefault(),
-
-                        Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
-                        .OrderByDescending(feeding => feeding.FeedingTime)
-                        .Select(feeding => feeding.FeedingTime)
-                        .FirstOrDefault(), DateTime.UtcNow)
-                    })
-                    .ToListAsync();
-
-                cachedResult = new PagedResult<GetPetDTO>
-                {
-                    Items = items,
-                    TotalCount = totalCount,
-                    CurrentPage = page,
-                    PageSize = pageSize
-                };
-
-                _cache.Set(cacheKey, cachedResult, new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
-                    .AddExpirationToken(new CancellationChangeToken(_resetCacheToken.Token)));
-            }
-
-            return cachedResult!;
-        }
-
-        /// <summary>
-        /// Retrieves a specific pet by its unique identifier.
-        /// </summary>
-        /// <param name="id">The primary key of the pet to retrieve.</param>
-        /// <returns>A <see cref="GetPetDTO"/> if found; otherwise, null.</returns>
-        public async Task<GetPetDTO?> GetPetByIdAsync(int id)
-        {
-            var now = DateTime.UtcNow;
-
-            return await context.Pets
-                .Where(pet => pet.Id == id)
-                .Select(pet => new GetPetDTO
-                {
-                    Id = pet.Id,
-                    Name = pet.Name,
-                    Age = pet.Age,
-                    AdditionalInformation = pet.AdditionalInformation,
-                    CreationDate = pet.CreatedAt,
-                    RowVersion = pet.RowVersion,
-
-                    LastFed = pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(),
-
-                    Status = PetStatusCalculator.CalculateHunger(pet.FeedingTimes
-                    .OrderByDescending(feeding => feeding.FeedingTime)
-                    .Select(feeding => feeding.FeedingTime)
-                    .FirstOrDefault(), now)
-                })
-                .FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Persists a new pet record and assigns an initial creation timestamp.
-        /// </summary>
-        /// <param name="petToAdd">The data required to create the pet.</param>
-        /// <returns><see cref="GetPetDTO"/> representing the newly created pet, including its generated ID.</returns>
-        public async Task<GetPetDTO> AddPetAsync(CommandPetDTO petToAdd)
-        {
-            var pet = new Pet
-            {
-                Name = petToAdd.Name,
-                Age = petToAdd.Age,
-                AdditionalInformation = petToAdd.AdditionalInformation,
-            };
-            
-
-            context.Pets.Add(pet);
-            await context.SaveChangesAsync();
-
-            ClearPetCache();
-
-            return new GetPetDTO
-            {
-                Id = pet.Id,
-                Name = pet.Name,
-                Age = pet.Age,
-                AdditionalInformation = pet.AdditionalInformation,
-                CreationDate = pet.CreatedAt
-            };
-        }
 
         /// <summary>
         /// Updates an existing pet record with concurrency conflict detection.
@@ -206,7 +48,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 return ServiceResult.Fail(ServiceResultError.ConcurrencyConflict);
             }
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return ServiceResult.Ok();
         }
@@ -226,7 +68,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             petItem.MarkAsDeleted();
             await context.SaveChangesAsync();
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return true;
         }
@@ -243,16 +85,9 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             pet.Restore();
             await context.SaveChangesAsync();
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return true;
-        }
-
-        public static void ClearPetCache()
-        {
-            _resetCacheToken.Cancel();
-            _resetCacheToken.Dispose();
-            _resetCacheToken = new CancellationTokenSource();
         }
     }
 }
