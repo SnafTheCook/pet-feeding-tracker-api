@@ -1,6 +1,7 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Features.Pets.Queries;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -14,6 +15,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
     {
         private readonly AppDbContext _context;
         private readonly PetService _service;
+        private readonly GetPagedPetsHandler _getPagedPetsHandler;
         private readonly IMemoryCache _cache;
         private readonly UpdateAuditableInterceptor _auditingInterceptor = new();
         public PetServiceTests()
