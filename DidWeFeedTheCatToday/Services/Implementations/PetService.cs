@@ -1,5 +1,6 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -47,7 +48,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
                 return ServiceResult.Fail(ServiceResultError.ConcurrencyConflict);
             }
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return ServiceResult.Ok();
         }
@@ -67,7 +68,7 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             petItem.MarkAsDeleted();
             await context.SaveChangesAsync();
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return true;
         }
@@ -84,16 +85,9 @@ namespace DidWeFeedTheCatToday.Services.Implementations
             pet.Restore();
             await context.SaveChangesAsync();
 
-            ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return true;
-        }
-
-        public static void ClearPetCache()
-        {
-            _resetCacheToken.Cancel();
-            _resetCacheToken.Dispose();
-            _resetCacheToken = new CancellationTokenSource();
         }
     }
 }

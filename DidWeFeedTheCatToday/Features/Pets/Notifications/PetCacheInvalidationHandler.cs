@@ -7,7 +7,7 @@ namespace DidWeFeedTheCatToday.Features.Pets.Notifications
     {
         public Task Handle(PetChangedNotification notification, CancellationToken cancellationToken)
         {
-            PetService.ClearPetCache();
+            PetCacheHelper.InvalidateCache();
 
             return Task.CompletedTask;
         }
