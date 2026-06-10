@@ -1,6 +1,7 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Features.Pets.Queries;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
 
             _context = new AppDbContext(options);
 
+            PetCacheHelper.InvalidateCache();
+
             _cache = new MemoryCache(new MemoryCacheOptions());
             _handler = new GetPagedPetsHandler(_context, _cache);
         }
@@ -43,6 +46,24 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
 
             result.Items.Should().HaveCount(2);
             result.TotalCount.Should().Be(7);
+        }
+
+        [Fact]
+        public async Task Handle_WhenCalledTwice_ReturnsCachedData()
+        {
+            _context.Pets.Add(new Pet { Name = "CacheTest" });
+            await _context.SaveChangesAsync();
+
+            var query = new GetPagedPetsQuery(1, 10, null, "name");
+
+            await _handler.Handle(query, CancellationToken.None);
+
+            _context.Pets.RemoveRange(_context.Pets);
+            await _context.SaveChangesAsync();
+
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            result.Items.Should().NotBeEmpty();
         }
 
         public void Dispose()
