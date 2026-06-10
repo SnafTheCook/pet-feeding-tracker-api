@@ -57,7 +57,7 @@ namespace DidWeFeedTheCatToday.Features.Pets.Queries
                     CreationDate = i.CreatedAt,
                     LastFed = i.LastFed,
                     Status = PetStatusCalculator.CalculateHunger(i.LastFed, now)
-                });
+                }).ToList();
 
                 cachedResult = new PagedResult<GetPetDTO>
                 {
