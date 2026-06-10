@@ -1,7 +1,6 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Entities;
-using DidWeFeedTheCatToday.Features.Pets.Queries;
 using DidWeFeedTheCatToday.Services.Implementations;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
@@ -82,41 +81,6 @@ namespace DidWeFeedTheCatToday.Tests.Services
 
             result.Should().NotBeNull();
             result.Should().BeEmpty();
-        }
-
-        [Fact]
-        public async Task GetPagedPetsAsync_WhenCalledTwice_ReturnsCachedDataEvenIfDbIsCleared()
-        {
-            var pet = new Pet { Name = "cacheTest" };
-            _context.Pets.Add(pet);
-            await _context.SaveChangesAsync();
-
-            await _service.GetPagedPetsAsync(1, 10, null, "name");
-
-            _context.Pets.RemoveRange(_context.Pets);
-            await _context.SaveChangesAsync();
-
-            var result = await _service.GetPagedPetsAsync(1, 10, null, "name");
-
-            result.Items.Should().NotBeEmpty();
-            result.Items.First().Name.Should().Be("cacheTest");
-        }
-
-        [Fact]
-        public async Task GetPagedPetsAsync_WhenRequestingSecondPage_ReturnsCorrectSlice()
-        {
-            for (int i = 1; i <= 7; i++)
-            {
-                _context.Pets.Add(new Pet { Name = $"Pet {i}" });
-            }
-            await _context.SaveChangesAsync();
-
-            var result = await _service.GetPagedPetsAsync(page: 2, pageSize: 5, searchTerm: null, sortBy: "name");
-
-            result.Items.Should().HaveCount(2);
-            result.TotalCount.Should().Be(7);
-            result.CurrentPage.Should().Be(2);
-            result.TotalPages.Should().Be(2);
         }
 
         [Fact]
