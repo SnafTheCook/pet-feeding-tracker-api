@@ -2,6 +2,7 @@ using Asp.Versioning;
 using DidWeFeedTheCatToday.Configuration;
 using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Data.Interceptors;
+using DidWeFeedTheCatToday.Features.Common.Behaviors;
 using DidWeFeedTheCatToday.Hubs;
 using DidWeFeedTheCatToday.Middleware;
 using DidWeFeedTheCatToday.Services.Implementations;
@@ -90,7 +91,12 @@ builder.Services.AddSignalR();
 builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 builder.Services.AddMemoryCache();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(cfg => 
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
 builder.Services.AddMassTransit(x =>
 {
     if (isTesting)
