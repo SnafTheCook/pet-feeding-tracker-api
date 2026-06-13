@@ -23,10 +23,7 @@ var isTesting = builder.Environment.IsEnvironment("Testing") ||
 var appSettings = new AppSettings();
 
 builder.Configuration.GetSection("AppSettings").Bind(appSettings);
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(typeof(ValidationFilter));
-});
+builder.Services.AddControllers();
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>

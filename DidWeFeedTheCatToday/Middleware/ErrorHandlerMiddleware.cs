@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Shared.Common;
+using FluentValidation;
 using System.Text.Json;
 
 namespace DidWeFeedTheCatToday.Middleware
@@ -23,15 +24,17 @@ namespace DidWeFeedTheCatToday.Middleware
 
         private static Task HandleErrorAsync(HttpContext context, Exception exception)
         {
-            var code = StatusCodes.Status500InternalServerError;
-            var message = "A server side error occured";
-
-            if (exception is KeyNotFoundException)
+            var (code, message) = exception switch
             {
-                code = StatusCodes.Status404NotFound;
-                message = exception.Message;
-            }
-            
+                ValidationException vEx =>
+                    (StatusCodes.Status400BadRequest, string.Join(" | ", vEx.Errors.Select(e => e.ErrorMessage))),
+
+                KeyNotFoundException =>
+                    (StatusCodes.Status404NotFound, exception.Message),
+
+                _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+            };
+
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = code;
 
