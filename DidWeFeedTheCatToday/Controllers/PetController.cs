@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using DidWeFeedTheCatToday.Features.Pets;
+using DidWeFeedTheCatToday.Features.Pets.Commands;
 using DidWeFeedTheCatToday.Features.Pets.Queries;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
@@ -12,7 +13,7 @@ namespace DidWeFeedTheCatToday.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/pets")]
     [ApiController]
-    public class PetController(IPetService petService, IMediator mediator) : ControllerBase
+    public class PetController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Retrieves all pets from the database.
@@ -80,7 +81,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPet(int id, CommandPetDTO petDTO)
         {
-            var result = await petService.OverridePetAsync(id, petDTO);
+            var result = await mediator.Send(new UpdatePetCommand(id, petDTO));
 
             if (!result.Success)
             {
@@ -104,7 +105,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePet(int id)
         {
-            var success = await petService.DeletePetAsync(id);
+            var success = await mediator.Send(new DeletePetCommand(id));
 
             if (!success)
                 return NotFound(ApiResponse<GetPetDTO>.Fail("Pet not found."));
