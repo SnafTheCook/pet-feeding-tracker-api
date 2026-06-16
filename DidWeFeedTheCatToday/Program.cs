@@ -79,7 +79,6 @@ builder.Services.AddCors(policy =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IRequestContext, RequestContext>();
 builder.Services.AddScoped<IAuthServices, AuthService>();
-builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<IFeedingService, FeedingService>();
 builder.Services.AddScoped<IPetFeedingQueryService, PetFeedingQueryService>();
 builder.Services.AddScoped<ValidationFilter>();
