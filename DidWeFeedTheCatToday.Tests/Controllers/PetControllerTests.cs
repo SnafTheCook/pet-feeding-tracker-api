@@ -1,7 +1,7 @@
 ﻿using DidWeFeedTheCatToday.Controllers;
 using DidWeFeedTheCatToday.Features.Pets;
+using DidWeFeedTheCatToday.Features.Pets.Commands;
 using DidWeFeedTheCatToday.Features.Pets.Queries;
-using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
@@ -14,14 +14,12 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
     public class PetControllerTests
     {
         private readonly Mock<IMediator> _mockMediator;
-        private readonly Mock<IPetService> _mockPetService;
         private readonly PetController _petController;
 
         public PetControllerTests()
         {
-            _mockPetService = new Mock<IPetService>();
             _mockMediator = new Mock<IMediator>();
-            _petController = new PetController(_mockPetService.Object, _mockMediator.Object);
+            _petController = new PetController(_mockMediator.Object);
         }
 
         [Fact]
@@ -43,13 +41,13 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Data.Should().BeEquivalentTo(petDto);
         }
 
-        /*[Fact] //TODO
+        [Fact]
         public async Task GetPetById_WhenPetDoesntExist_ReturnsNotFound()
         {
             var petId = 9999;
 
-            _mockPetService
-                .Setup(setup => setup.GetPetByIdAsync(petId))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<GetPetByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((GetPetDTO?) null);
 
             var result = await _petController.GetPetById(petId);
@@ -58,7 +56,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
 
             apiResponse.Success.Should().BeFalse();
             apiResponse.Error.Should().Be("No Pet found under index.");
-        }*/
+        }
 
         [Fact]
         public async Task PostPet_WhenPetPosted_ReturnsOk()
@@ -88,8 +86,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             int testId = 1;
             var testPet = new CommandPetDTO { Name = "Meowstaroin" };
 
-            _mockPetService
-                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<UpdatePetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ServiceResult.Ok());
 
             var result = await _petController.PutPet(testId, testPet);
@@ -102,8 +100,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             int testId = 9999;
             var testPet = new CommandPetDTO { Name = "Meowstaroin" };
 
-            _mockPetService
-                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<UpdatePetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ServiceResult.Fail(ServiceResultError.NotFound));
 
             var result = await _petController.PutPet(testId, testPet);
@@ -113,7 +111,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Success.Should().BeFalse();
             apiResponse.Error.Should().Be("Pet not found.");
 
-            _mockPetService.Verify(v => v.OverridePetAsync(testId, testPet), Times.Once);
+            _mockMediator.Verify(m => m.Send(It.IsAny<UpdatePetCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -122,8 +120,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             int testId = 1;
             var testPet = new CommandPetDTO { Name = "Meowstaroin" };
 
-            _mockPetService
-                .Setup(setup => setup.OverridePetAsync(testId, testPet))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<UpdatePetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(ServiceResult.Fail(ServiceResultError.ConcurrencyConflict));
 
             var result = await _petController.PutPet(testId, testPet);
@@ -133,7 +131,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             apiResponse.Success.Should().BeFalse();
             apiResponse.Error.Should().Be("Pet was changed since last request.");
 
-            _mockPetService.Verify(v => v.OverridePetAsync(testId, testPet), Times.Once);
+            _mockMediator.Verify(m => m.Send(It.IsAny<UpdatePetCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -141,8 +139,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         {
             int testId = 1;
 
-            _mockPetService
-                .Setup(setup => setup.DeletePetAsync(testId))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<DeletePetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             var result = await _petController.DeletePet(testId);
@@ -155,8 +153,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         {
             int testId = 9999;
 
-            _mockPetService
-                .Setup(setup => setup.DeletePetAsync(testId))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<DeletePetCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             var result = await _petController.DeletePet(testId);
