@@ -2,11 +2,6 @@
 using DidWeFeedTheCatToday.Features.Pets.Notifications;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DidWeFeedTheCatToday.Tests.Features.Pets
 {
