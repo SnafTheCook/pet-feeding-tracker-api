@@ -1,6 +1,7 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Features.Pets.Queries;
+using DidWeFeedTheCatToday.Mappers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,13 +11,15 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
     {
         private readonly AppDbContext _context;
         private readonly GetPetByIdHandler _handler;
+        private readonly PetMapper _petMapper;
 
         public GetPetByIdHandlerTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(options);
-            _handler = new GetPetByIdHandler(_context);
+            _petMapper = new PetMapper();
+            _handler = new GetPetByIdHandler(_context, _petMapper);
         }
 
         [Fact]
