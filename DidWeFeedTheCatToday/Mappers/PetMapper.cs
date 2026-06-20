@@ -30,5 +30,23 @@ namespace DidWeFeedTheCatToday.Mappers
 
             return dto;
         }
+
+        [MapperIgnoreTarget(nameof(Pet.Id))]
+        [MapperIgnoreTarget(nameof(Pet.RowVersion))]
+        [MapperIgnoreTarget(nameof(Pet.IsDeleted))]
+        [MapperIgnoreTarget(nameof(Pet.CreatedAt))]
+        [MapperIgnoreTarget(nameof(Pet.LastModifiedAt))]
+        [MapperIgnoreTarget(nameof(Pet.FeedingTimes))]
+        [MapperIgnoreSource(nameof(CommandPetDTO.RowVersion))]
+        public partial Pet CommandToPet(CommandPetDTO dto);
+
+        [MapperIgnoreTarget(nameof(Pet.Id))]
+        [MapperIgnoreTarget(nameof(Pet.RowVersion))]
+        [MapperIgnoreTarget(nameof(Pet.IsDeleted))]
+        [MapperIgnoreTarget(nameof(Pet.CreatedAt))]
+        [MapperIgnoreTarget(nameof(Pet.LastModifiedAt))]
+        [MapperIgnoreTarget(nameof(Pet.FeedingTimes))]
+        [MapperIgnoreSource(nameof(CommandPetDTO.RowVersion))]
+        public partial void UpdatePetFromCommand(CommandPetDTO source, Pet target);
     }
 }
