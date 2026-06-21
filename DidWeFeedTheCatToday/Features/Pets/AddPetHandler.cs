@@ -1,20 +1,17 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Features.Pets.Notifications;
+using DidWeFeedTheCatToday.Mappers;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using MediatR;
 
 namespace DidWeFeedTheCatToday.Features.Pets
 {
-    public class AddPetHandler(AppDbContext context, IPublisher publisher) : IRequestHandler<AddPetCommand, GetPetDTO>
+    public class AddPetHandler(AppDbContext context, IPublisher publisher, PetMapper mapper) : IRequestHandler<AddPetCommand, GetPetDTO>
     {
         public async Task<GetPetDTO> Handle(AddPetCommand request, CancellationToken cancellationToken)
         {
-            var pet = new Pet
-            {
-                Name = request.PetDto.Name,
-                Age = request.PetDto.Age
-            };
+            var pet = mapper.CommandToPet(request.PetDto);
 
             context.Pets.Add(pet);
             await context.SaveChangesAsync();
