@@ -3,6 +3,7 @@ using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Features.Pets.Queries;
+using DidWeFeedTheCatToday.Mappers;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,6 +16,7 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
         private readonly IMemoryCache _cache;
         private readonly GetPagedPetsHandler _handler;
         private readonly UpdateAuditableInterceptor _auditingInterceptor = new();
+        private readonly PetMapper _petMapper;
         public GetPagedPetsHandlerTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -27,7 +29,8 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
             PetCacheHelper.InvalidateCache();
 
             _cache = new MemoryCache(new MemoryCacheOptions());
-            _handler = new GetPagedPetsHandler(_context, _cache);
+            _petMapper = new PetMapper();
+            _handler = new GetPagedPetsHandler(_context, _cache, _petMapper);
         }
 
         [Fact]
