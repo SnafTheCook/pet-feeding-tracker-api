@@ -2,6 +2,7 @@
 using DidWeFeedTheCatToday.Data.Interceptors;
 using DidWeFeedTheCatToday.Features.Pets;
 using DidWeFeedTheCatToday.Features.Pets.Notifications;
+using DidWeFeedTheCatToday.Mappers;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
 using MediatR;
@@ -15,6 +16,7 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
         private readonly AppDbContext _context;
         private readonly Mock<IPublisher> _mockPublisher = new();
         private readonly AddPetHandler _handler;
+        private readonly PetMapper _mapper;
 
         public AddPetHandlerTests()
         {
@@ -23,7 +25,8 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
                 .AddInterceptors(new UpdateAuditableInterceptor()).Options;
 
             _context = new AppDbContext(options);
-            _handler = new AddPetHandler(_context, _mockPublisher.Object);
+            _mapper = new PetMapper();
+            _handler = new AddPetHandler(_context, _mockPublisher.Object, _mapper);
         }
 
         [Fact]

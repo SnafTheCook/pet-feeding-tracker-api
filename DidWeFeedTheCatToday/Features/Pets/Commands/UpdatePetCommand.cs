@@ -1,5 +1,6 @@
 ﻿using DidWeFeedTheCatToday.Data;
 using DidWeFeedTheCatToday.Features.Pets.Notifications;
+using DidWeFeedTheCatToday.Mappers;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using MediatR;
@@ -9,7 +10,7 @@ namespace DidWeFeedTheCatToday.Features.Pets.Commands
 {
     public record UpdatePetCommand(int Id, CommandPetDTO PetDto) : IRequest<ServiceResult>;
 
-    public class UpdatePetHandler(AppDbContext context, IPublisher publisher)
+    public class UpdatePetHandler(AppDbContext context, IPublisher publisher, PetMapper mapper)
         : IRequestHandler<UpdatePetCommand, ServiceResult>
     {
         public async Task<ServiceResult> Handle(UpdatePetCommand request, CancellationToken ct)
@@ -19,9 +20,7 @@ namespace DidWeFeedTheCatToday.Features.Pets.Commands
             if (pet == null) 
                 return ServiceResult.Fail(ServiceResultError.NotFound);
 
-            pet.Name = request.PetDto.Name;
-            pet.Age = request.PetDto.Age;
-            pet.AdditionalInformation = request.PetDto.AdditionalInformation;
+            mapper.UpdatePetFromCommand(request.PetDto, pet);
 
             if (request.PetDto.RowVersion != null)
             {

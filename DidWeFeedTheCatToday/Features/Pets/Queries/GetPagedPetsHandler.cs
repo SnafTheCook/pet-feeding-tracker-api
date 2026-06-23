@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Data;
+using DidWeFeedTheCatToday.Mappers;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using DidWeFeedTheCatToday.Shared.Utils;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DidWeFeedTheCatToday.Features.Pets.Queries
 {
-    public class GetPagedPetsHandler(AppDbContext context, IMemoryCache cache) : IRequestHandler<GetPagedPetsQuery, PagedResult<GetPetDTO>>
+    public class GetPagedPetsHandler(AppDbContext context, IMemoryCache cache, PetMapper mapper) : IRequestHandler<GetPagedPetsQuery, PagedResult<GetPetDTO>>
     {
         public async Task<PagedResult<GetPetDTO>> Handle(GetPagedPetsQuery request, CancellationToken cancellationToken)
         {
@@ -35,29 +36,9 @@ namespace DidWeFeedTheCatToday.Features.Pets.Queries
                 var items = await query
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
-                    .Select(p => new
-                    {
-                        p.Id,
-                        p.Name,
-                        p.Age,
-                        p.AdditionalInformation,
-                        p.RowVersion,
-                        p.CreatedAt,
-                        LastFed = p.FeedingTimes.OrderByDescending(f => f.FeedingTime).Select(f => f.FeedingTime).FirstOrDefault()
-                    })
                     .ToListAsync(cancellationToken);
 
-                var dtos = items.Select(i => new GetPetDTO
-                {
-                    Id = i.Id,
-                    Name = i.Name,
-                    Age = i.Age,
-                    AdditionalInformation = i.AdditionalInformation,
-                    RowVersion = i.RowVersion,
-                    CreationDate = i.CreatedAt,
-                    LastFed = i.LastFed,
-                    Status = PetStatusCalculator.CalculateHunger(i.LastFed, now)
-                }).ToList();
+                var dtos = items.Select(mapper.PetToGetPetDTO).ToList();
 
                 cachedResult = new PagedResult<GetPetDTO>
                 {

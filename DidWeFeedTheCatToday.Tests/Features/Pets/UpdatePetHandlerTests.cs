@@ -2,6 +2,7 @@
 using DidWeFeedTheCatToday.Entities;
 using DidWeFeedTheCatToday.Features.Pets.Commands;
 using DidWeFeedTheCatToday.Features.Pets.Notifications;
+using DidWeFeedTheCatToday.Mappers;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using FluentAssertions;
 using MediatR;
@@ -15,13 +16,15 @@ namespace DidWeFeedTheCatToday.Tests.Features.Pets
         private readonly AppDbContext _context;
         private readonly Mock<IPublisher> _mockPublisher = new();
         private readonly UpdatePetHandler _handler;
+        private readonly PetMapper _petMapper;
 
         public UpdatePetHandlerTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             _context = new AppDbContext(options);
-            _handler = new UpdatePetHandler(_context, _mockPublisher.Object);
+            _petMapper = new PetMapper();
+            _handler = new UpdatePetHandler(_context, _mockPublisher.Object, _petMapper);
         }
 
         [Fact]
