@@ -7,12 +7,14 @@ using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Pets;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/pets")]
     [ApiController]
+    [EnableRateLimiting("fixed")]
     public class PetController(IMediator mediator) : ControllerBase
     {
         /// <summary>
