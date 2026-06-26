@@ -3,12 +3,14 @@ using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/feedings")]
     [ApiController]
+    [EnableRateLimiting("fixed")]
     public class FeedingController(IFeedingService feedingService) : ControllerBase
     {
         /// <summary>

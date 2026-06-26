@@ -6,12 +6,14 @@ using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
 using DidWeFeedTheCatToday.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DidWeFeedTheCatToday.Controllers
 {
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/pet-feedings")]
     [ApiController]
+    [EnableRateLimiting("fixed")]
     public class PetFeedingQueryController(IPetFeedingQueryService petFeedingQueryService) : ControllerBase
     {
         /// <summary>
