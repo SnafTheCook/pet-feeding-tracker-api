@@ -84,6 +84,7 @@ builder.Services.AddScoped<IRequestContext, RequestContext>();
 builder.Services.AddScoped<IAuthServices, AuthService>();
 builder.Services.AddScoped<IFeedingService, FeedingService>();
 builder.Services.AddScoped<IPetFeedingQueryService, PetFeedingQueryService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ValidationFilter>();
 builder.Services.AddSingleton<PetMapper>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
