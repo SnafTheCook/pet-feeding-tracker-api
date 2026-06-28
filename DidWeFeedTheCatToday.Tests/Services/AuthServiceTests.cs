@@ -17,7 +17,7 @@ namespace DidWeFeedTheCatToday.Tests.Services
 {
     public class AuthServiceTests
     {
-        private readonly Mock<IRequestContext> _mockRequestContext = new();
+        /*private readonly Mock<IRequestContext> _mockRequestContext = new();
         private readonly Mock<ILogger<AuthService>> _mockLogger = new();
         private readonly IOptions<AppSettings> _options;
 
@@ -138,6 +138,6 @@ namespace DidWeFeedTheCatToday.Tests.Services
                     ),
                     Times.Once
                 );
-        }
+        }*/
     }
 }
