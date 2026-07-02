@@ -1,7 +1,8 @@
 ﻿using Asp.Versioning;
-using DidWeFeedTheCatToday.Services.Interfaces;
+using DidWeFeedTheCatToday.Features.Auth.Commands;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Auth;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -11,7 +12,7 @@ namespace DidWeFeedTheCatToday.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [EnableRateLimiting("fixed")]
-    public class AuthController(IAuthServices authService) : ControllerBase
+    public class AuthController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Handles user registration.
@@ -21,12 +22,8 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<RegisterResponseDTO>>> Register(UserDTO request)
         {
-            var result = await authService.RegisterAsync(request);
-
-            if (result == null)
-                return BadRequest(ApiResponse<RegisterResponseDTO>.Fail("Username is taken. Try different username."));
-
-            return Ok(ApiResponse<RegisterResponseDTO>.Ok(result));
+            var result = await mediator.Send(new RegisterUserCommand(request));
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
@@ -37,12 +34,8 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<TokenResponseDTO>>> Login(UserDTO request)
         {
-            var result = await authService.LoginAsync(request);
-
-            if (result == null)
-                return Unauthorized(ApiResponse<TokenResponseDTO>.Fail("Invalid login credentials. Try again."));
-
-            return Ok(ApiResponse<TokenResponseDTO>.Ok(result));
+            var result = await mediator.Send(new LoginCommand(request));
+            return result.Success ? Ok(result) : Unauthorized(result);
         }
 
         /// <summary>
@@ -53,12 +46,8 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPost("refreshToken")]
         public async Task<ActionResult<ApiResponse<TokenResponseDTO>>> RefreshToken(RefreshTokenRequestDTO request)
         {
-            var result = await authService.RefreshTokenAsync(request);
-
-            if (result == null || result.RefreshToken == null || result.AccessToken == null)
-                return Unauthorized(ApiResponse<TokenResponseDTO>.Fail("Invalid or expired refresh token."));
-
-            return Ok(ApiResponse<TokenResponseDTO>.Ok(result));
+            var result = await mediator.Send(new RefreshTokenCommand(request));
+            return result.Success ? Ok(result) : Unauthorized(result);
         }
     }
 }
