@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Features.Pets
 {
     public class AddPetHandler(AppDbContext context, IPublisher publisher, PetMapper mapper) : IRequestHandler<AddPetCommand, GetPetDTO>
     {
+        /// <summary>
+        /// Handles the creation of a new pet entity.
+        /// Persists data to the database and triggers a cache invalidation event.
+        /// </summary>
         public async Task<GetPetDTO> Handle(AddPetCommand request, CancellationToken cancellationToken)
         {
             var pet = mapper.CommandToPet(request.PetDto);
