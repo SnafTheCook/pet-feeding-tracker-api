@@ -13,6 +13,10 @@ namespace DidWeFeedTheCatToday.Features.Pets.Commands
     public class UpdatePetHandler(AppDbContext context, IPublisher publisher, PetMapper mapper)
         : IRequestHandler<UpdatePetCommand, ServiceResult>
     {
+        /// <summary>
+        /// Updates an existing pet's details.
+        /// Implements optimistic concurrency checks using RowVersion to prevent data overwrites.
+        /// </summary>
         public async Task<ServiceResult> Handle(UpdatePetCommand request, CancellationToken ct)
         {
             var pet = await context.Pets.FindAsync([request.Id], ct);
