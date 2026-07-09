@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Features.Pets.Commands
     public class DeletePetHandler(AppDbContext context, IPublisher publisher)
         : IRequestHandler<DeletePetCommand, bool>
     {
+        /// <summary>
+        /// Performs a soft-delete on a pet record.
+        /// Marks the entity as deleted without physical removal to maintain audit integrity.
+        /// </summary>
         public async Task<bool> Handle(DeletePetCommand request, CancellationToken ct)
         {
             var pet = await context.Pets.FindAsync([request.Id], ct);
