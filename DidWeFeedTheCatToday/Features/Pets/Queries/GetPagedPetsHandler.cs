@@ -12,6 +12,10 @@ namespace DidWeFeedTheCatToday.Features.Pets.Queries
 {
     public class GetPagedPetsHandler(AppDbContext context, IMemoryCache cache, PetMapper mapper) : IRequestHandler<GetPagedPetsQuery, PagedResult<GetPetDTO>>
     {
+        /// <summary>
+        /// Retrieves a paginated and filtered list of pets.
+        /// Utilizes IMemoryCache to reduce database load for frequent identical queries.
+        /// </summary>
         public async Task<PagedResult<GetPetDTO>> Handle(GetPagedPetsQuery request, CancellationToken cancellationToken)
         {
             string cacheKey = $"pets_{request.Page}_{request.PageSize}_{request.SearchTerm}_{request.SortBy}";
