@@ -9,6 +9,10 @@ namespace DidWeFeedTheCatToday.Features.Pets.Queries
 {
     public class GetPetByIdHandler(AppDbContext context, PetMapper mapper) : IRequestHandler<GetPetByIdQuery, GetPetDTO?>
     {
+        /// <summary>
+        /// Fetches a single pet by its unique ID.
+        /// Projects the result directly into a DTO for optimal performance.
+        /// </summary>
         public async Task<GetPetDTO?> Handle(GetPetByIdQuery request, CancellationToken cancellationToken)
         {
             var now = DateTime.UtcNow;
