@@ -4,6 +4,10 @@ using System.Text.Json;
 
 namespace DidWeFeedTheCatToday.Middleware
 {
+    /// <summary>
+    /// Global interceptor for unhandled exceptions.
+    /// Standardizes error responses into a consistent ApiResponse format for all clients.
+    /// </summary>
     public class ErrorHandlerMiddleware(RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
     {
         private readonly RequestDelegate _next = next;
