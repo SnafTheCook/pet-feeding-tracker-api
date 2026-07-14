@@ -4,6 +4,10 @@ using System.Net.Http.Headers;
 
 namespace DidWeFeedTheCatToday.Client.Handlers
 {
+    /// <summary>
+    /// Client-side HTTP interceptor for JWT management.
+    /// Automatically attaches Bearer tokens and handles silent token refreshing on 401 responses.
+    /// </summary>
     public class JwtAuthorizationHandler(IJSRuntime js, IServiceProvider serviceProvider) : DelegatingHandler
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
