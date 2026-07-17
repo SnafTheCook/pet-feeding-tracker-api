@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
+using DidWeFeedTheCatToday.Features.Feedings;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -11,7 +13,7 @@ namespace DidWeFeedTheCatToday.Controllers
     [Route("api/v{version:apiVersion}/feedings")]
     [ApiController]
     [EnableRateLimiting("fixed")]
-    public class FeedingController(IFeedingService feedingService) : ControllerBase
+    public class FeedingController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Retrieves complete history of feedings.
@@ -20,7 +22,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<GetFeedingDTO>>>> GetFeedings()
         {
-            var result = await feedingService.GetFeedingsAsync();
+            var result = await mediator.Send(new GetFeedingsQuery());
 
             return Ok(ApiResponse<IEnumerable<GetFeedingDTO>>.Ok(result));
         }
@@ -32,7 +34,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetFeedingDTO>>> GetFeedingById(int id)
         {
-            var result = await feedingService.GetFeedingByIdAsync(id);
+            var result = await mediator.Send(new GetFeedingByIdQuery(id));
 
             if (result == null)
                 return NotFound(ApiResponse<GetFeedingDTO>.Fail("Feeding not found."));
@@ -47,12 +49,15 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<GetFeedingDTO>>> PostFeeding(PostFeedingDTO feeding, CancellationToken ct = default)
         {
-            var result = await feedingService.AddFeedingAsync(feeding, ct);
+            var result = await mediator.Send(new AddFeedingCommand(feeding));
 
-            if (result == null) 
+            if (result == null)
                 return BadRequest(ApiResponse<GetFeedingDTO>.Fail("Invalid pet."));
 
-            return CreatedAtAction(nameof(GetFeedingById), new { id = result.Id }, ApiResponse<GetFeedingDTO>.Ok(result));
+            return CreatedAtAction(
+                nameof(GetFeedingById),
+                new { version = "1.0", id = result.Id },
+                ApiResponse<GetFeedingDTO>.Ok(result));
         }
         /// <summary>
         /// Removes the unique feeding.
@@ -62,7 +67,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFeeding(int id)
         {
-            var success = await feedingService.DeleteFeedingAsync(id);
+            var success = await mediator.Send(new DeleteFeedingCommand(id));
 
             if (!success)
                 return NotFound(ApiResponse<GetFeedingDTO>.Fail("Feeding not found."));
