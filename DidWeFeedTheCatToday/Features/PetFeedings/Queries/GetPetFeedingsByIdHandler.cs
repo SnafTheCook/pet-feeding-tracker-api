@@ -19,7 +19,12 @@ namespace DidWeFeedTheCatToday.Features.PetFeedings.Queries
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    FeedingTimes = p.FeedingTimes.Select(f => new GetFeedingDTO { ... }).ToList()
+                    FeedingTimes = p.FeedingTimes.Select(f => new GetFeedingDTO 
+                    {
+                        Id = f.Id,
+                        PetId = f.PetId,
+                        FeedingTime = f.FeedingTime
+                    }).ToList()
                 })
                 .FirstOrDefaultAsync(ct);
         }
