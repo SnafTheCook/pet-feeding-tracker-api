@@ -1,9 +1,11 @@
 ﻿using Asp.Versioning;
 using DidWeFeedTheCatToday.Entities;
+using DidWeFeedTheCatToday.Features.PetFeedings.Queries;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
 using DidWeFeedTheCatToday.Shared.Enums;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -14,7 +16,7 @@ namespace DidWeFeedTheCatToday.Controllers
     [Route("api/v{version:apiVersion}/pet-feedings")]
     [ApiController]
     [EnableRateLimiting("fixed")]
-    public class PetFeedingQueryController(IPetFeedingQueryService petFeedingQueryService) : ControllerBase
+    public class PetFeedingQueryController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Retrieve all pets and their respective feeding histories.
@@ -24,7 +26,7 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<GetPetFeedingDTO>>>> GetPetsWithFeedings()
         {
-            var result = await petFeedingQueryService.GetAllPetFeedingsAsync();
+            var result = await mediator.Send(new GetPetFeedingsQuery());
 
             return Ok(ApiResponse<IEnumerable<GetPetFeedingDTO>>.Ok(result));
         }
@@ -37,10 +39,10 @@ namespace DidWeFeedTheCatToday.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetPetFeedingDTO>>> GetPetsWithFeedingsById(int id)
         {
-            var result = await petFeedingQueryService.GetPetFeedingsByIdAsync(id);
+            var result = await mediator.Send(new GetPetFeedingsByIdQuery(id));
 
             if (result == null)
-                return NotFound(ApiResponse<GetPetFeedingDTO>.Fail("Pet and it's feeding times were not found."));
+                return NotFound(ApiResponse<GetPetFeedingDTO>.Fail("Pet and its feeding times were not found."));
 
             return Ok(ApiResponse<GetPetFeedingDTO>.Ok(result));
         }
