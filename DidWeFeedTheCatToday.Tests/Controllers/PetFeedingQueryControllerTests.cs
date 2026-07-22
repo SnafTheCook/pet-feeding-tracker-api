@@ -1,9 +1,11 @@
-﻿/*using DidWeFeedTheCatToday.Controllers;
+﻿using DidWeFeedTheCatToday.Controllers;
+using DidWeFeedTheCatToday.Features.PetFeedings.Queries;
 using DidWeFeedTheCatToday.Services.Interfaces;
 using DidWeFeedTheCatToday.Shared.Common;
 using DidWeFeedTheCatToday.Shared.DTOs.Feedings;
 using DidWeFeedTheCatToday.Shared.DTOs.PetFeedings;
 using FluentAssertions;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -11,13 +13,13 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
 {
     public class PetFeedingQueryControllerTests
     {
-        private readonly Mock<IPetFeedingQueryService> _mockPetFeedingQueryService;
+        private readonly Mock<IMediator> _mockMediator;
         private readonly PetFeedingQueryController _controller;
 
         public PetFeedingQueryControllerTests()
         {
-            _mockPetFeedingQueryService = new Mock<IPetFeedingQueryService>();
-            _controller = new PetFeedingQueryController(_mockPetFeedingQueryService.Object);
+            _mockMediator = new Mock<IMediator>();
+            _controller = new PetFeedingQueryController(_mockMediator.Object);
         }
 
         private List<GetPetFeedingDTO> GetTestDataSetup()
@@ -85,8 +87,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         {
             var testPets = GetTestDataSetup();
 
-            _mockPetFeedingQueryService
-                .Setup(setup => setup.GetAllPetFeedingsAsync())
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<GetPetFeedingsQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(testPets);
 
             var result = await _controller.GetPetsWithFeedings();
@@ -106,8 +108,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             var testPet = GetTestDataSetup()[0];
             int testId = 1;
 
-            _mockPetFeedingQueryService
-                .Setup(setup => setup.GetPetFeedingsByIdAsync(testId))
+            _mockMediator
+                .Setup(m => m.Send(It.Is<GetPetFeedingsByIdQuery>(q => q.Id == testId), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(testPet);
 
             var result = await _controller.GetPetsWithFeedingsById(testId);
@@ -125,8 +127,8 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
         {
             int testId = 1;
 
-            _mockPetFeedingQueryService
-                .Setup(setup => setup.GetPetFeedingsByIdAsync(testId))
+            _mockMediator
+                .Setup(m => m.Send(It.IsAny<GetPetFeedingsByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((GetPetFeedingDTO?)null);
 
             var result = await _controller.GetPetsWithFeedingsById(testId);
@@ -135,8 +137,7 @@ namespace DidWeFeedTheCatToday.Tests.Controllers
             var apiResponse = notFoundResult.Value.Should().BeOfType<ApiResponse<GetPetFeedingDTO>>().Subject;
 
             apiResponse.Data.Should().BeNull();
-            apiResponse.Error.Should().Be("Pet and it's feeding times were not found.");
+            apiResponse.Error.Should().Be("Pet and its feeding times were not found.");
         }
     }
 }
-*/
