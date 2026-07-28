@@ -103,6 +103,12 @@ builder.Services.AddMassTransit(x =>
     }
     else
     {
+        x.AddEntityFrameworkOutbox<AppDbContext>(o =>
+        {
+            o.UseSqlServer();
+            o.UseBusOutbox();
+        });
+
         x.UsingRabbitMq((context, cfg) =>
         {
             cfg.Host(appSettings.RabbitMqHost);
