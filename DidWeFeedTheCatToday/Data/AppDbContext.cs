@@ -1,4 +1,5 @@
 ﻿using DidWeFeedTheCatToday.Entities;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace DidWeFeedTheCatToday.Data
@@ -45,6 +46,9 @@ namespace DidWeFeedTheCatToday.Data
 
             modelBuilder.Entity<Pet>().HasQueryFilter(p => !p.IsDeleted);
 
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
         }
     }
 }
